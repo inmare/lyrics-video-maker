@@ -1,40 +1,49 @@
-class Subtitle {
+export default class SubtitleDiv {
   constructor({ length, time, context }) {
+    // set default values
     this._length = length;
     this._time = time;
     this._context = context;
+    // creative div
+    this._div = document.createElement("div");
+    this._div.style.width = `${length}px`;
+    this._div.style.left = `${time}px`;
+    this._div.innerHTML = context;
+    this._div.classList.add("subtitle");
   }
 
   setLength(length) {
     this._length = length;
+    this._div.style.width = `${length}px`;
   }
 
   setTime(time) {
     this._time = time;
+    this._div.style.left = `${time}px`;
   }
 
   setContext(context) {
     this._context = context;
-  }
-}
-
-export default class SubtitleDiv extends Subtitle {
-  constructor({ length, time, context }) {
-    super({ length, time, context });
-    this.div = document.createElement("div");
-    this.div.style.width = `${length}px`;
-    this.div.style.left = `${time}px`;
-    this.div.innerHTML = context;
-    this.div.classList.add("subtitle");
-    this.div.onclick = () => {
-      this.highlightDiv();
-    };
+    this._div.innerHTML = context;
   }
 
-  highlightDiv(subtitleArray) {
-    for (let sub of subtitleArray) {
-      sub.div.classList.remove("highlight");
-    }
-    this.div.classList.toggle("highlight");
+  getLength() {
+    return this._length;
+  }
+
+  getTime() {
+    return this._time;
+  }
+
+  getContext() {
+    return this._context;
+  }
+
+  getDiv() {
+    return this._div;
+  }
+
+  highlightToggle() {
+    this._div.classList.toggle("highlight");
   }
 }
