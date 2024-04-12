@@ -45,42 +45,120 @@ document.addEventListener("mousedown", (e) => {
 
 document.addEventListener("mousemove", (e) => {
   // move lyrics div when mouse is down and lyrics is selected
+
   if (LYRICS_ARRAY.selected instanceof LyricsDiv) {
     if (isMouseDown) {
-      const scroll = timelineWrapper.scrollLeft;
-      const time = e.clientX - shiftX + scroll;
-      LYRICS_ARRAY.selected.setTime(time);
-      isMouseMoving = true;
+      if (!isSizeChanging) {
+        const scroll = timelineWrapper.scrollLeft;
+        const time = e.clientX - offsetFront + scroll;
+        LYRICS_ARRAY.selected.setTime(time);
+        isMouseMoving = true;
 
-      const nextLyrics =
-        LYRICS_ARRAY[LYRICS_ARRAY.indexOf(LYRICS_ARRAY.selected) + 1];
+        const nextLyrics =
+          LYRICS_ARRAY[LYRICS_ARRAY.indexOf(LYRICS_ARRAY.selected) + 1];
 
-      if (nextLyrics) {
-        const divXLimit = nextLyrics.getDivStartPos() - 1;
-        const currentDivEnd = time + LYRICS_ARRAY.selected.getLength();
-        if (currentDivEnd > divXLimit) {
-          LYRICS_ARRAY.selected.setTime(
-            divXLimit - LYRICS_ARRAY.selected.getLength(),
-          );
+        if (nextLyrics) {
+          // -1을 하지 않으면 다음 div의 시작점이 겹칠 수 있음
+          const divXLimit = nextLyrics.getDivStartPos() - 1;
+          const currentDivEnd = time + LYRICS_ARRAY.selected.getLength();
+          if (currentDivEnd > divXLimit) {
+            LYRICS_ARRAY.selected.setTime(
+              divXLimit - LYRICS_ARRAY.selected.getLength(),
+            );
+          }
+        } else if (
+          !nextLyrics &&
+          LYRICS_ARRAY.indexOf(LYRICS_ARRAY.selected) ===
+            LYRICS_ARRAY.length - 1
+        ) {
+          const divXLimit = tempTimelineLength - 1;
+          const currentDivEnd = time + LYRICS_ARRAY.selected.getLength();
+          if (currentDivEnd > divXLimit) {
+            LYRICS_ARRAY.selected.setTime(
+              divXLimit - LYRICS_ARRAY.selected.getLength(),
+            );
+          }
         }
-      }
 
-      const prevLyrics =
-        LYRICS_ARRAY[LYRICS_ARRAY.indexOf(LYRICS_ARRAY.selected) - 1];
+        const prevLyrics =
+          LYRICS_ARRAY[LYRICS_ARRAY.indexOf(LYRICS_ARRAY.selected) - 1];
 
-      if (prevLyrics) {
-        const divXLimit =
-          prevLyrics.getDivStartPos() + prevLyrics.getLength() - 1;
-        if (time < divXLimit) {
-          LYRICS_ARRAY.selected.setTime(divXLimit);
+        if (prevLyrics) {
+          const divXLimit =
+            prevLyrics.getDivStartPos() + prevLyrics.getLength() - 1;
+          if (time < divXLimit) {
+            LYRICS_ARRAY.selected.setTime(divXLimit);
+          }
+        } else if (
+          !prevLyrics &&
+          LYRICS_ARRAY.indexOf(LYRICS_ARRAY.selected) === 0
+        ) {
+          const devXLimit = 0;
+          if (time < devXLimit) {
+            LYRICS_ARRAY.selected.setTime(devXLimit);
+          }
         }
-      } else if (
-        !prevLyrics &&
-        LYRICS_ARRAY.indexOf(LYRICS_ARRAY.selected) === 0
-      ) {
-        const devXLimit = 0;
-        if (time < devXLimit) {
-          LYRICS_ARRAY.selected.setTime(devXLimit);
+      } else if (isSizeChanging) {
+        const scroll = timelineWrapper.scrollLeft;
+        const time = e.clientX - offsetFront + scroll;
+        const shiftX = e.clientX - LYRICS_ARRAY.selected.getDivStartPos();
+        const length = shiftX + offsetEnd;
+
+        // check the e.target is the last child of parent element
+        if (sizeChangePos === "front") {
+          // 나중에 다시 작성
+          // const prevLyrics =
+          //   LYRICS_ARRAY[LYRICS_ARRAY.indexOf(LYRICS_ARRAY.selected) - 1];
+          // if (prevLyrics) {
+          //   const divXLimit =
+          //     prevLyrics.getDivStartPos() + prevLyrics.getLength() - 1;
+          //   if (time < divXLimit) {
+          //     LYRICS_ARRAY.selected.setTime(divXLimit);
+          //   } else {
+          //     LYRICS_ARRAY.selected.setTime(time);
+          //     LYRICS_ARRAY.selected.setLength(length);
+          //   }
+          // } else if (
+          //   !prevLyrics &&
+          //   LYRICS_ARRAY.indexOf(LYRICS_ARRAY.selected) === 0
+          // ) {
+          //   const devXLimit = 0;
+          //   if (time < devXLimit) {
+          //     LYRICS_ARRAY.selected.setTime(devXLimit);
+          //   }
+          // }
+        } else if (sizeChangePos === "end") {
+          const nextLyrics =
+            LYRICS_ARRAY[LYRICS_ARRAY.indexOf(LYRICS_ARRAY.selected) + 1];
+
+          if (nextLyrics) {
+            const divXLimit = nextLyrics.getDivStartPos() - 1;
+            const currentDivEnd =
+              LYRICS_ARRAY.selected.getDivStartPos() + length;
+            // console.log(divXLimit, currentDivEnd);
+            if (currentDivEnd > divXLimit) {
+              LYRICS_ARRAY.selected.setLength(
+                nextLyrics.getDivStartPos() -
+                  LYRICS_ARRAY.selected.getDivStartPos(),
+              );
+            } else {
+              LYRICS_ARRAY.selected.setLength(length);
+            }
+          } else if (
+            !nextLyrics &&
+            LYRICS_ARRAY.indexOf(LYRICS_ARRAY.selected) ===
+              LYRICS_ARRAY.length - 1
+          ) {
+            const divXLimit = tempTimelineLength - 1;
+            const currentDivEnd = time + LYRICS_ARRAY.selected.getLength();
+            if (currentDivEnd > divXLimit) {
+              LYRICS_ARRAY.selected.setLength(
+                divXLimit - LYRICS_ARRAY.selected.getTime(),
+              );
+            } else {
+              LYRICS_ARRAY.selected.setLength(length);
+            }
+          }
         }
       }
     }
