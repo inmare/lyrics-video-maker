@@ -1,4 +1,4 @@
-export default class SubtitleDiv {
+export default class LyricsDiv {
   constructor({ length, time, context }) {
     // set default values
     this._length = length;
@@ -9,7 +9,7 @@ export default class SubtitleDiv {
     this._div.style.width = `${length}px`;
     this._div.style.left = `${time}px`;
     this._div.innerHTML = context;
-    this._div.classList.add("subtitle");
+    this._div.classList.add("lyrics");
   }
 
   setLength(length) {
@@ -43,7 +43,7 @@ export default class SubtitleDiv {
     return this._div;
   }
 
-  highlightToggle() {
-    this._div.classList.toggle("highlight");
+  toggleHighlight() {
+    this._div.classList.toggle("lyrics-highlight");
   }
 }

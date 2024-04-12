@@ -1,80 +1,78 @@
-import SubtitleDiv from "./SubtitleDiv";
-import SubtitleArray from "./SubtitleArray";
-import { SUBTITLE_FORMAT } from "./globals";
+import LyricsDiv from "./LyricsDiv";
+import LyricsArray from "./LyricsArray";
+import { LYRICS_FORMAT } from "./globals";
 
-const SUBTITLE_ARRAY = new SubtitleArray();
+const LYRICS_ARRAY = new LyricsArray();
 
-const addSubtitleBtn = document.querySelector("#add-subtitle");
-addSubtitleBtn.addEventListener("click", addSubtitleDiv);
+const addLyricsBtn = document.querySelector("#add-lyrics");
+addLyricsBtn.addEventListener("click", addLyricsDiv);
 
-const subtitleContainer = document.querySelector("#subtitle-container");
+const lyricsContainer = document.querySelector("#lyrics-container");
 
 let shiftX = null;
 let isMouseDown = false;
 let isMouseMoving = false;
 
 document.addEventListener("mousedown", (e) => {
-  if (e.target.classList.contains("subtitle")) {
-    if (SUBTITLE_ARRAY.selected === null) {
-      SUBTITLE_ARRAY.selected = SUBTITLE_ARRAY.find(
-        (subtitle) => subtitle.getDiv() === e.target,
+  // check the clicked element is lyrics
+  if (e.target.classList.contains("lyrics")) {
+    // if lyrics div is clicked, then toggle highlight
+    if (LYRICS_ARRAY.selected === null) {
+      LYRICS_ARRAY.selected = LYRICS_ARRAY.find(
+        (lyrics) => lyrics.getDiv() === e.target,
       );
-      SUBTITLE_ARRAY.selected.highlightToggle();
-    } else if (SUBTITLE_ARRAY.selected instanceof SubtitleDiv) {
-      SUBTITLE_ARRAY.selected.highlightToggle();
-      SUBTITLE_ARRAY.selected = SUBTITLE_ARRAY.find(
-        (subtitle) => subtitle.getDiv() === e.target,
+      LYRICS_ARRAY.selected.toggleHighlight();
+    } else if (LYRICS_ARRAY.selected instanceof LyricsDiv) {
+      LYRICS_ARRAY.selected.toggleHighlight();
+      LYRICS_ARRAY.selected = LYRICS_ARRAY.find(
+        (lyrics) => lyrics.getDiv() === e.target,
       );
-      SUBTITLE_ARRAY.selected.highlightToggle();
+      LYRICS_ARRAY.selected.toggleHighlight();
     }
     shiftX =
-      e.clientX - SUBTITLE_ARRAY.selected.getDiv().getBoundingClientRect().left;
+      e.clientX - LYRICS_ARRAY.selected.getDiv().getBoundingClientRect().left;
     isMouseDown = true;
   } else {
-    if (SUBTITLE_ARRAY.selected instanceof SubtitleDiv) {
-      SUBTITLE_ARRAY.selected.highlightToggle();
-      SUBTITLE_ARRAY.selected = null;
+    if (LYRICS_ARRAY.selected instanceof LyricsDiv) {
+      LYRICS_ARRAY.selected.toggleHighlight();
+      LYRICS_ARRAY.selected = null;
     }
   }
 });
 
 document.addEventListener("mousemove", (e) => {
-  if (SUBTITLE_ARRAY.selected instanceof SubtitleDiv) {
+  if (LYRICS_ARRAY.selected instanceof LyricsDiv) {
     if (isMouseDown) {
       const time = e.clientX - shiftX;
-      SUBTITLE_ARRAY.selected.setTime(time);
+      LYRICS_ARRAY.selected.setTime(time);
       isMouseMoving = true;
     }
   }
 });
 
 document.addEventListener("mouseup", (e) => {
-  if (SUBTITLE_ARRAY.selected instanceof SubtitleDiv) {
+  if (LYRICS_ARRAY.selected instanceof LyricsDiv) {
     if (isMouseMoving && isMouseDown) {
-      const offset = e.clientX - SUBTITLE_ARRAY.selected.getTime();
+      const offset = e.clientX - LYRICS_ARRAY.selected.getTime();
       const time = e.clientX - offset;
-      SUBTITLE_ARRAY.selected.setTime(time);
+      LYRICS_ARRAY.selected.setTime(time);
     }
     isMouseDown = false;
     isMouseMoving = false;
   }
 });
 
-function addSubtitleDiv() {
-  const subtitleDiv = new SubtitleDiv(SUBTITLE_FORMAT);
-  subtitleDiv.setTime(0);
-  subtitleDiv.setLength(100);
-  subtitleDiv.setContext("Subtitle");
+function addLyricsDiv() {
+  const lyricsDiv = new LyricsDiv(LYRICS_FORMAT);
+  lyricsDiv.setTime(0);
+  lyricsDiv.setLength(100);
+  lyricsDiv.setContext("Lyrics");
 
-  if (SUBTITLE_ARRAY.length > 0) {
-    const lastSubtitle = SUBTITLE_ARRAY[SUBTITLE_ARRAY.length - 1];
-    subtitleDiv.setTime(lastSubtitle.getTime() + lastSubtitle.getLength());
+  if (LYRICS_ARRAY.length > 0) {
+    const lastSubtitle = LYRICS_ARRAY[LYRICS_ARRAY.length - 1];
+    lyricsDiv.setTime(lastSubtitle.getTime() + lastSubtitle.getLength());
   }
 
-  SUBTITLE_ARRAY.push(subtitleDiv);
-  subtitleContainer.appendChild(subtitleDiv._div);
+  LYRICS_ARRAY.push(lyricsDiv);
+  lyricsContainer.appendChild(lyricsDiv._div);
 }
-
-window.onmousemove = () => {
-  // if mousedown is ture and div is selected, then drag the div
-};

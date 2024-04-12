@@ -1,7 +1,7 @@
-const SUBTITLE_FORMAT = {
+const LYRICS_FORMAT = {
   length: null,
   time: null,
   context: "",
 };
 
-export { SUBTITLE_FORMAT };
+export { LYRICS_FORMAT };
