@@ -4,4 +4,6 @@ const LYRICS_FORMAT = {
   context: "",
 };
 
-export { LYRICS_FORMAT };
+const SECOND_LEN_PX = 30;
+
+export { LYRICS_FORMAT, SECOND_LEN_PX };
