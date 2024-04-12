@@ -7,6 +7,7 @@ const LYRICS_ARRAY = new LyricsArray();
 const addLyricsBtn = document.querySelector("#add-lyrics");
 addLyricsBtn.addEventListener("click", addLyricsDiv);
 
+const timelineWrapper = document.querySelector("#timeline-wrapper");
 const timeline = document.querySelector("#timeline");
 const markContainer = document.querySelector("#mark-container");
 const lyricsContainer = document.querySelector("#lyrics-container");
@@ -47,7 +48,9 @@ document.addEventListener("mousemove", (e) => {
   // move lyrics div when mouse is down and lyrics is selected
   if (LYRICS_ARRAY.selected instanceof LyricsDiv) {
     if (isMouseDown) {
-      const time = e.clientX - shiftX;
+      const scroll = timelineWrapper.scrollLeft;
+      console.log(scroll);
+      const time = e.clientX - shiftX + scroll;
       LYRICS_ARRAY.selected.setTime(time);
       isMouseMoving = true;
     }
@@ -75,6 +78,7 @@ function initTimeline() {
   const tempTimelineLength = 2000;
   const markTimeGap = 50;
   timeline.style.width = `${tempTimelineLength}px`;
+
   for (let i = 0; i < tempTimelineLength; i += markTimeGap) {
     const mark = document.createElement("div");
     mark.classList.add("mark");
