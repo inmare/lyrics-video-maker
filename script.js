@@ -2,6 +2,9 @@ import LyricsDiv from "./LyricsDiv";
 import LyricsArray from "./LyricsArray";
 import { LYRICS_FORMAT, SECOND_LEN_PX } from "./globals";
 
+// temp global variable
+const tempTimelineLength = SECOND_LEN_PX * 120;
+
 const LYRICS_ARRAY = new LyricsArray();
 
 const addLyricsBtn = document.querySelector("#add-lyrics");
@@ -12,32 +15,49 @@ const timeline = document.querySelector("#timeline");
 const markContainer = document.querySelector("#mark-container");
 const lyricsContainer = document.querySelector("#lyrics-container");
 
-let shiftX = null;
+let offsetFront = null;
+let offsetEnd = null;
 let isMouseDown = false;
 let isMouseMoving = false;
+let isSizeChanging = false;
+let sizeChangePos = null; // "front" or "end"
 
 document.addEventListener("mousedown", (e) => {
   // check the clicked element is lyrics
-  if (e.target.classList.contains("lyrics")) {
+  const isLyricsClicked = e.target.closest(".lyrics") ? true : false;
+  if (isLyricsClicked) {
     // if lyrics div is clicked, then toggle highlight
+    let lyricsDiv = e.target.closest(".lyrics");
+
     if (LYRICS_ARRAY.selected === null) {
       LYRICS_ARRAY.selected = LYRICS_ARRAY.find(
-        (lyrics) => lyrics.getDiv() === e.target,
+        (lyrics) => lyrics.getDiv() === lyricsDiv,
       );
-      LYRICS_ARRAY.selected.toggleHighlight();
+      LYRICS_ARRAY.selected.enableHighlight();
     } else if (LYRICS_ARRAY.selected instanceof LyricsDiv) {
-      LYRICS_ARRAY.selected.toggleHighlight();
+      LYRICS_ARRAY.selected.removeHighlight();
       LYRICS_ARRAY.selected = LYRICS_ARRAY.find(
-        (lyrics) => lyrics.getDiv() === e.target,
+        (lyrics) => lyrics.getDiv() === lyricsDiv,
       );
-      LYRICS_ARRAY.selected.toggleHighlight();
+      LYRICS_ARRAY.selected.enableHighlight();
     }
-    shiftX = e.clientX - LYRICS_ARRAY.selected.getDivStartPos();
+
+    offsetFront = e.clientX - LYRICS_ARRAY.selected.getDivStartPos();
+    offsetEnd = LYRICS_ARRAY.selected.getLength() - offsetFront;
     isMouseDown = true;
+
+    if (e.target.classList.contains("lyrics-size-change")) {
+      isSizeChanging = true;
+      if (e.target.parentElement.firstElementChild === e.target) {
+        sizeChangePos = "front";
+      } else if (e.target.parentElement.lastElementChild === e.target) {
+        sizeChangePos = "end";
+      }
+    }
   } else {
     // if clicked other part of the screen, then remove highlight
     if (LYRICS_ARRAY.selected instanceof LyricsDiv) {
-      LYRICS_ARRAY.selected.toggleHighlight();
+      LYRICS_ARRAY.selected.removeHighlight();
       LYRICS_ARRAY.selected = null;
     }
   }
@@ -173,8 +193,11 @@ document.addEventListener("mouseup", (e) => {
       const time = e.clientX - offset;
       LYRICS_ARRAY.selected.setTime(time);
     }
+    offsetFront = null;
+    offsetEnd = null;
     isMouseDown = false;
     isMouseMoving = false;
+    isSizeChanging = false;
   }
 });
 
@@ -183,7 +206,6 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function initTimeline() {
-  const tempTimelineLength = SECOND_LEN_PX * 120;
   const markTimeGap = SECOND_LEN_PX;
   timeline.style.width = `${tempTimelineLength}px`;
 
@@ -208,4 +230,5 @@ function addLyricsDiv() {
 
   LYRICS_ARRAY.push(lyricsDiv);
   lyricsContainer.appendChild(lyricsDiv.getDiv());
+  // lyricsDiv.initHighlightDiv();
 }
