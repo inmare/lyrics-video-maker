@@ -7,6 +7,8 @@ const LYRICS_ARRAY = new LyricsArray();
 const addLyricsBtn = document.querySelector("#add-lyrics");
 addLyricsBtn.addEventListener("click", addLyricsDiv);
 
+const timeline = document.querySelector("#timeline");
+const markContainer = document.querySelector("#mark-container");
 const lyricsContainer = document.querySelector("#lyrics-container");
 
 let shiftX = null;
@@ -33,6 +35,7 @@ document.addEventListener("mousedown", (e) => {
       e.clientX - LYRICS_ARRAY.selected.getDiv().getBoundingClientRect().left;
     isMouseDown = true;
   } else {
+    // if clicked other part of the screen, then remove highlight
     if (LYRICS_ARRAY.selected instanceof LyricsDiv) {
       LYRICS_ARRAY.selected.toggleHighlight();
       LYRICS_ARRAY.selected = null;
@@ -41,6 +44,7 @@ document.addEventListener("mousedown", (e) => {
 });
 
 document.addEventListener("mousemove", (e) => {
+  // move lyrics div when mouse is down and lyrics is selected
   if (LYRICS_ARRAY.selected instanceof LyricsDiv) {
     if (isMouseDown) {
       const time = e.clientX - shiftX;
@@ -51,6 +55,7 @@ document.addEventListener("mousemove", (e) => {
 });
 
 document.addEventListener("mouseup", (e) => {
+  // when mouse is up, then set the time of the selected lyrics
   if (LYRICS_ARRAY.selected instanceof LyricsDiv) {
     if (isMouseMoving && isMouseDown) {
       const offset = e.clientX - LYRICS_ARRAY.selected.getTime();
@@ -61,6 +66,22 @@ document.addEventListener("mouseup", (e) => {
     isMouseMoving = false;
   }
 });
+
+document.addEventListener("DOMContentLoaded", () => {
+  initTimeline();
+});
+
+function initTimeline() {
+  const tempTimelineLength = 2000;
+  const markTimeGap = 50;
+  timeline.style.width = `${tempTimelineLength}px`;
+  for (let i = 0; i < tempTimelineLength; i += markTimeGap) {
+    const mark = document.createElement("div");
+    mark.classList.add("mark");
+    mark.style.left = `${i}px`;
+    markContainer.appendChild(mark);
+  }
+}
 
 function addLyricsDiv() {
   const lyricsDiv = new LyricsDiv(LYRICS_FORMAT);
