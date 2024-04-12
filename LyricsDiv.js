@@ -5,11 +5,7 @@ export default class LyricsDiv {
     this._time = time;
     this._context = context;
     // creative div
-    this._div = document.createElement("div");
-    this._div.style.width = `${length}px`;
-    this._div.style.left = `${time}px`;
-    this._div.innerHTML = context;
-    this._div.classList.add("lyrics");
+    this._div = this._initDiv();
   }
 
   setLength(length) {
@@ -24,7 +20,7 @@ export default class LyricsDiv {
 
   setContext(context) {
     this._context = context;
-    this._div.innerHTML = context;
+    // this._div.innerHTML = context;
   }
 
   getLength() {
@@ -39,8 +35,29 @@ export default class LyricsDiv {
     return this._context;
   }
 
+  _initDiv() {
+    const div = document.createElement("div");
+    div.style.width = `${this._length}px`;
+    div.style.left = `${this._time}px`;
+    div.innerHTML = this._context;
+    div.classList.add("lyrics");
+    return div;
+  }
+
   getDiv() {
     return this._div;
+  }
+
+  setSelectedDiv() {
+    const div = document.createElement("div");
+    div.classList.add("lyrics-selected");
+    this._div.appendChild(div);
+
+    console.log(this._div);
+  }
+
+  getDivStartPos() {
+    return this._div.getBoundingClientRect().left;
   }
 
   toggleHighlight() {
