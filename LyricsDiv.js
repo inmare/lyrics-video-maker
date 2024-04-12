@@ -6,6 +6,7 @@ export default class LyricsDiv {
     this._context = context;
     // creative div
     this._div = this._initDiv();
+    this._hightlightDiv = this._initHighlightDiv();
   }
 
   setLength(length) {
@@ -35,6 +36,26 @@ export default class LyricsDiv {
     return this._context;
   }
 
+  getDiv() {
+    return this._div;
+  }
+
+  enableHighlight() {
+    this._hightlightDiv.style.display = null;
+  }
+
+  removeHighlight() {
+    this._hightlightDiv.style.display = "none";
+  }
+
+  getDivStartPos() {
+    return this._div.getBoundingClientRect().left;
+  }
+
+  toggleHighlight() {
+    this._div.classList.toggle("lyrics-highlight");
+  }
+
   _initDiv() {
     const div = document.createElement("div");
     div.style.width = `${this._length}px`;
@@ -44,23 +65,26 @@ export default class LyricsDiv {
     return div;
   }
 
-  getDiv() {
-    return this._div;
-  }
-
-  setSelectedDiv() {
+  _initHighlightDiv() {
     const div = document.createElement("div");
     div.classList.add("lyrics-selected");
+    div.style.display = "none";
+
+    for (let i = 0; i < 2; i++) {
+      const subDiv = document.createElement("div");
+      subDiv.classList.add("lyrics-size-change");
+      if (i === 0) {
+        subDiv.style.borderTopRightRadius = "0px";
+        subDiv.style.borderBottomRightRadius = "0px";
+      } else if (i === 1) {
+        subDiv.style.borderTopLeftRadius = "0px";
+        subDiv.style.borderBottomLeftRadius = "0px";
+      }
+
+      div.appendChild(subDiv);
+    }
+
     this._div.appendChild(div);
-
-    console.log(this._div);
-  }
-
-  getDivStartPos() {
-    return this._div.getBoundingClientRect().left;
-  }
-
-  toggleHighlight() {
-    this._div.classList.toggle("lyrics-highlight");
+    return div;
   }
 }
