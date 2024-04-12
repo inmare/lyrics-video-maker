@@ -1,6 +1,6 @@
 import LyricsDiv from "./LyricsDiv";
 import LyricsArray from "./LyricsArray";
-import { LYRICS_FORMAT } from "./globals";
+import { LYRICS_FORMAT, SECOND_LEN_PX } from "./globals";
 
 const LYRICS_ARRAY = new LyricsArray();
 
@@ -32,8 +32,7 @@ document.addEventListener("mousedown", (e) => {
       );
       LYRICS_ARRAY.selected.toggleHighlight();
     }
-    shiftX =
-      e.clientX - LYRICS_ARRAY.selected.getDiv().getBoundingClientRect().left;
+    shiftX = e.clientX - LYRICS_ARRAY.selected.getDivStartPos();
     isMouseDown = true;
   } else {
     // if clicked other part of the screen, then remove highlight
@@ -49,10 +48,41 @@ document.addEventListener("mousemove", (e) => {
   if (LYRICS_ARRAY.selected instanceof LyricsDiv) {
     if (isMouseDown) {
       const scroll = timelineWrapper.scrollLeft;
-      console.log(scroll);
       const time = e.clientX - shiftX + scroll;
       LYRICS_ARRAY.selected.setTime(time);
       isMouseMoving = true;
+
+      const nextLyrics =
+        LYRICS_ARRAY[LYRICS_ARRAY.indexOf(LYRICS_ARRAY.selected) + 1];
+
+      if (nextLyrics) {
+        const divXLimit = nextLyrics.getDivStartPos() - 1;
+        const currentDivEnd = time + LYRICS_ARRAY.selected.getLength();
+        if (currentDivEnd > divXLimit) {
+          LYRICS_ARRAY.selected.setTime(
+            divXLimit - LYRICS_ARRAY.selected.getLength(),
+          );
+        }
+      }
+
+      const prevLyrics =
+        LYRICS_ARRAY[LYRICS_ARRAY.indexOf(LYRICS_ARRAY.selected) - 1];
+
+      if (prevLyrics) {
+        const divXLimit =
+          prevLyrics.getDivStartPos() + prevLyrics.getLength() - 1;
+        if (time < divXLimit) {
+          LYRICS_ARRAY.selected.setTime(divXLimit);
+        }
+      } else if (
+        !prevLyrics &&
+        LYRICS_ARRAY.indexOf(LYRICS_ARRAY.selected) === 0
+      ) {
+        const devXLimit = 0;
+        if (time < devXLimit) {
+          LYRICS_ARRAY.selected.setTime(devXLimit);
+        }
+      }
     }
   }
 });
@@ -75,8 +105,8 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function initTimeline() {
-  const tempTimelineLength = 2000;
-  const markTimeGap = 50;
+  const tempTimelineLength = SECOND_LEN_PX * 120;
+  const markTimeGap = SECOND_LEN_PX;
   timeline.style.width = `${tempTimelineLength}px`;
 
   for (let i = 0; i < tempTimelineLength; i += markTimeGap) {
@@ -90,7 +120,7 @@ function initTimeline() {
 function addLyricsDiv() {
   const lyricsDiv = new LyricsDiv(LYRICS_FORMAT);
   lyricsDiv.setTime(0);
-  lyricsDiv.setLength(100);
+  lyricsDiv.setLength(SECOND_LEN_PX * 4);
   lyricsDiv.setContext("Lyrics");
 
   if (LYRICS_ARRAY.length > 0) {
@@ -99,5 +129,5 @@ function addLyricsDiv() {
   }
 
   LYRICS_ARRAY.push(lyricsDiv);
-  lyricsContainer.appendChild(lyricsDiv._div);
+  lyricsContainer.appendChild(lyricsDiv.getDiv());
 }
