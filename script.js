@@ -20,33 +20,22 @@ const lyricsContainer = document.querySelector("#lyrics-container");
 document.addEventListener("mousedown", (e) => {
   // 클릭한 부분이 가사 div인지 확인
   const isLyricsClicked = e.target.closest(".lyrics") ? true : false;
-  if (isLyricsClicked) {
-    HANDLE_MOUSE_EVENT.enableHighlight(e, LYRICS_ARRAY);
-  } else {
-    HANDLE_MOUSE_EVENT.disableHighlight(e, LYRICS_ARRAY);
-  }
+  HANDLE_MOUSE_EVENT.setMousedownState(e, LYRICS_ARRAY, isLyricsClicked);
 });
 
 document.addEventListener("mousemove", (e) => {
   const isLyricsSelected = LYRICS_ARRAY.selected instanceof LyricsDiv;
-  const isDragging =
-    !HANDLE_MOUSE_EVENT.isSizeChanging && HANDLE_MOUSE_EVENT.isMouseDown;
-  const isSizeChanging = HANDLE_MOUSE_EVENT.isSizeChanging;
-
-  if (isLyricsSelected && isDragging) {
-    // 가사가 선택됐고 크기조절중이 아닐때
-    HANDLE_MOUSE_EVENT.moveLyrics(e, LYRICS_ARRAY, timelineWrapper);
-  } else if (isLyricsSelected && isSizeChanging) {
-    // 가사가 선택됐고 크기조절중일때
-    HANDLE_MOUSE_EVENT.sizeChangeLyrics(e, LYRICS_ARRAY);
+  if (isLyricsSelected) {
+    const scrollAmount = timelineWrapper.scrollLeft;
+    HANDLE_MOUSE_EVENT.setMousemoveState(e, LYRICS_ARRAY, scrollAmount);
   }
 });
 
 document.addEventListener("mouseup", (e) => {
-  // when mouse is up, then set the time of the selected lyrics
+  // 마우스를 떼었을 때 기존에 클래스에 저장한 값 초기화
   const isLyricsDragged = LYRICS_ARRAY.selected instanceof LyricsDiv;
   if (isLyricsDragged) {
-    HANDLE_MOUSE_EVENT.fixLyricsPos();
+    HANDLE_MOUSE_EVENT.initMouseState();
   }
 });
 
