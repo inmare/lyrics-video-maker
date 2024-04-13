@@ -21,7 +21,7 @@ export default class LyricsDiv {
 
   setContext(context) {
     this._context = context;
-    // this._div.innerHTML = context;
+    this._setDivContext(context);
   }
 
   getLength() {
@@ -44,7 +44,7 @@ export default class LyricsDiv {
     this._hightlightDiv.style.display = null;
   }
 
-  removeHighlight() {
+  disableHighlight() {
     this._hightlightDiv.style.display = "none";
   }
 
@@ -60,9 +60,18 @@ export default class LyricsDiv {
     const div = document.createElement("div");
     div.style.width = `${this._length}px`;
     div.style.left = `${this._time}px`;
-    div.innerHTML = this._context;
     div.classList.add("lyrics");
+
+    const p = document.createElement("p");
+    p.innerText = this._context;
+    p.classList.add("lyrics-context");
+    div.appendChild(p);
+
     return div;
+  }
+
+  _setDivContext(context) {
+    this._div.querySelector("p").innerText = context;
   }
 
   _initHighlightDiv() {
