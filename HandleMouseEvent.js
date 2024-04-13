@@ -3,184 +3,102 @@ import LyricsDiv from "./LyricsDiv";
 export default class HandleMouseEvent {
   // 마우스 이벤트 관련 this.변수
   constructor() {
-    this.leftDivDelta = null; // div의 시작지점에서 마우스의 위치, Number
-    this.rightDivDelta = null; // div의 끝지점에서 마우스의 위치, Number
-    this.mouseDownPos = null; // 마우스를 누르기 시작한 위치, Number
-    this.originalLength = null; // div의 원래 길이, Number
+    this.divInfo = {
+      leftFromCursor: null, // div의 시작지점에서 마우스의 위치, Number
+      rightFromCursor: null, // div의 끝지점에서 마우스의 위치, Number
+      mouseDownPos: null, // 마우스를 누르기 시작한 위치, Number
+      originalLength: null, // div의 원래 길이, Number
+    };
+
     this.isMouseDown = false; // 마우스를 누르고 있는 상태인지
     this.isMouseMoving = false; // 마우스를 움직이고 있는 상태인지
     this.isSizeChanging = false; // 크기 조절 중인 상태인지
     this.sizeChangeFrom = null; // 어디에서 크기조절을 시작했는지, "left" or "right"
   }
 
-  // 선택한 div highlight 추가
-  enableHighlight(e, lyricsArr) {
-    let lyricsDiv = e.target.closest(".lyrics");
-
-    // 현재 선택된 가사의 여부에 따라 lyricsArr.selected를 설정
-    if (lyricsArr.selected === null) {
-      lyricsArr.selected = lyricsArr.find(
-        (lyrics) => lyrics.getDiv() === lyricsDiv,
-      );
-      lyricsArr.selected.enableHighlight();
-    } else if (lyricsArr.selected instanceof LyricsDiv) {
-      lyricsArr.selected.removeHighlight();
-      lyricsArr.selected = lyricsArr.find(
-        (lyrics) => lyrics.getDiv() === lyricsDiv,
-      );
-      lyricsArr.selected.enableHighlight();
-    }
-
+  _saveMouseInfo(e, lyricsArr) {
     // 마우스의 위치 및 현재 마우스를 누르고 있는 상태를 저장
-    this.leftDivDelta = e.clientX - lyricsArr.selected.getDivStartPos();
-    this.rightDivDelta = lyricsArr.selected.getLength() - this.leftDivDelta;
-    this.isMouseDown = true;
-    this.mouseDownPos = e.clientX;
-    this.originalLength = lyricsArr.selected.getLength();
+    this.divInfo.leftFromCursor =
+      e.clientX - lyricsArr.selected.getDivStartPos();
+    this.divInfo.rightFromCursor =
+      lyricsArr.selected.getLength() - this.divInfo.leftFromCursor;
+    this.divInfo.originalLength = lyricsArr.selected.getLength();
+    this.divInfo.mouseDownPos = e.clientX;
+  }
 
-    // 만약 크기조절 div 부분을 선택했다면 크기 조절 중인 상태로 변경
-    if (e.target.classList.contains("lyrics-size-change")) {
-      this.isSizeChanging = true;
-      if (e.target.parentElement.firstElementChild === e.target) {
-        this.sizeChangeFrom = "front";
-      } else if (e.target.parentElement.lastElementChild === e.target) {
-        this.sizeChangeFrom = "end";
+  // 선택한 div highlight 추가
+  setMousedownState(e, lyricsArr, isLyricsClicked) {
+    this.isMouseDown = true;
+
+    if (isLyricsClicked) {
+      let lyricsDiv = e.target.closest(".lyrics");
+
+      // 현재 선택된 가사의 여부에 따라 lyricsArr.selected를 설정
+      if (lyricsArr.selected === null) {
+        lyricsArr.selected = lyricsArr.find(
+          (lyrics) => lyrics.getDiv() === lyricsDiv,
+        );
+      } else if (lyricsArr.selected instanceof LyricsDiv) {
+        lyricsArr.selected.disableHighlight();
+        lyricsArr.selected = lyricsArr.find(
+          (lyrics) => lyrics.getDiv() === lyricsDiv,
+        );
       }
+
+      this._enableHighlight(lyricsArr);
+      this._setSizeChangeFrom(e);
+      this._saveMouseInfo(e, lyricsArr);
+    } else {
+      this._disableHighlight(lyricsArr);
     }
   }
 
+  _enableHighlight(lyricsArr) {
+    lyricsArr.selected.enableHighlight();
+  }
+
   // 선택된 div highlight 해제
-  disableHighlight(lyricsArr) {
+  _disableHighlight(lyricsArr) {
     if (lyricsArr.selected instanceof LyricsDiv) {
-      lyricsArr.selected.removeHighlight();
+      lyricsArr.selected.disableHighlight();
       lyricsArr.selected = null;
     }
   }
 
-  mousemove(e, lyricsArr) {
-    if (lyricsArr.selected instanceof LyricsDiv) {
-      if (isMouseDown) {
-        if (!isSizeChanging) {
-          const scroll = timelineWrapper.scrollLeft;
-          const time = e.clientX - offsetFront + scroll;
-          lyricsArr.selected.setTime(time);
-          isMouseMoving = true;
-
-          const nextLyrics =
-            lyricsArr[lyricsArr.indexOf(lyricsArr.selected) + 1];
-
-          if (nextLyrics) {
-            // -1을 하지 않으면 다음 div의 시작점이 겹칠 수 있음
-            const divXLimit = nextLyrics.getDivStartPos() - 1;
-            const currentDivEnd = time + lyricsArr.selected.getLength();
-            if (currentDivEnd > divXLimit) {
-              lyricsArr.selected.setTime(
-                divXLimit - lyricsArr.selected.getLength(),
-              );
-            }
-          } else if (
-            !nextLyrics &&
-            lyricsArr.indexOf(lyricsArr.selected) === lyricsArr.length - 1
-          ) {
-            const divXLimit = tempTimelineLength - 1;
-            const currentDivEnd = time + lyricsArr.selected.getLength();
-            if (currentDivEnd > divXLimit) {
-              lyricsArr.selected.setTime(
-                divXLimit - lyricsArr.selected.getLength(),
-              );
-            }
-          }
-
-          const prevLyrics =
-            lyricsArr[lyricsArr.indexOf(lyricsArr.selected) - 1];
-
-          if (prevLyrics) {
-            const divXLimit =
-              prevLyrics.getDivStartPos() + prevLyrics.getLength() - 1;
-            if (time < divXLimit) {
-              lyricsArr.selected.setTime(divXLimit);
-            }
-          } else if (
-            !prevLyrics &&
-            lyricsArr.indexOf(lyricsArr.selected) === 0
-          ) {
-            const devXLimit = 0;
-            if (time < devXLimit) {
-              lyricsArr.selected.setTime(devXLimit);
-            }
-          }
-        } else if (isSizeChanging) {
-          const scroll = timelineWrapper.scrollLeft;
-          const time = e.clientX - offsetFront + scroll;
-          const shiftX = e.clientX - lyricsArr.selected.getDivStartPos();
-          const length = shiftX + offsetEnd;
-
-          // check the e.target is the last child of parent element
-          if (sizeChangePos === "front") {
-            // 나중에 다시 작성
-            // const prevLyrics =
-            //   lyricsArr[lyricsArr.indexOf(lyricsArr.selected) - 1];
-            // if (prevLyrics) {
-            //   const divXLimit =
-            //     prevLyrics.getDivStartPos() + prevLyrics.getLength() - 1;
-            //   if (time < divXLimit) {
-            //     lyricsArr.selected.setTime(divXLimit);
-            //   } else {
-            //     lyricsArr.selected.setTime(time);
-            //     lyricsArr.selected.setLength(length);
-            //   }
-            // } else if (
-            //   !prevLyrics &&
-            //   lyricsArr.indexOf(lyricsArr.selected) === 0
-            // ) {
-            //   const devXLimit = 0;
-            //   if (time < devXLimit) {
-            //     lyricsArr.selected.setTime(devXLimit);
-            //   }
-            // }
-          } else if (sizeChangePos === "end") {
-            const nextLyrics =
-              lyricsArr[lyricsArr.indexOf(lyricsArr.selected) + 1];
-
-            if (nextLyrics) {
-              const divXLimit = nextLyrics.getDivStartPos() - 1;
-              const currentDivEnd =
-                lyricsArr.selected.getDivStartPos() + length;
-              // console.log(divXLimit, currentDivEnd);
-              if (currentDivEnd > divXLimit) {
-                lyricsArr.selected.setLength(
-                  nextLyrics.getDivStartPos() -
-                    lyricsArr.selected.getDivStartPos(),
-                );
-              } else {
-                lyricsArr.selected.setLength(length);
-              }
-            } else if (
-              !nextLyrics &&
-              lyricsArr.indexOf(lyricsArr.selected) === lyricsArr.length - 1
-            ) {
-              const divXLimit = tempTimelineLength - 1;
-              const currentDivEnd = time + lyricsArr.selected.getLength();
-              if (currentDivEnd > divXLimit) {
-                lyricsArr.selected.setLength(
-                  divXLimit - lyricsArr.selected.getTime(),
-                );
-              } else {
-                lyricsArr.selected.setLength(length);
-              }
-            }
-          }
-        }
+  _setSizeChangeFrom(e) {
+    // 만약 크기조절 div 부분을 선택했다면 크기 조절 중인 상태로 변경
+    if (e.target.classList.contains("lyrics-size-change")) {
+      this.isSizeChanging = true;
+      if (e.target.parentElement.firstElementChild === e.target) {
+        this.sizeChangeFrom = "left";
+      } else if (e.target.parentElement.lastElementChild === e.target) {
+        this.sizeChangeFrom = "right";
       }
+    } else {
+      this.isSizeChanging = false;
     }
   }
 
-  moveLyrics(e, lyricsArr, scrollAmount) {
+  setMousemoveState(e, lyricsArr, scrollAmount) {
     this.isMouseMoving = true;
 
+    const isDragging = !this.isSizeChanging && this.isMouseDown;
+    const isSizeChanging = this.isSizeChanging;
+
+    if (isDragging) {
+      // 가사가 선택됐고 크기조절중이 아닐때
+      this._moveLyrics(e, lyricsArr, scrollAmount);
+    } else if (isSizeChanging) {
+      // 가사가 선택됐고 크기조절중일때
+      this._sizeChangeLyrics(e, lyricsArr, scrollAmount);
+    }
+  }
+
+  _moveLyrics(e, lyricsArr, scrollAmount) {
     // 현재 div의 시간
     // 브라우저 마우스 위치 - div 시작점 위치 + 스크롤 된 길이
-    const lyricsStartTime = e.clientX - this.leftDivDelta + scrollAmount;
+    const lyricsStartTime =
+      e.clientX - this.divInfo.leftFromCursor + scrollAmount;
     lyricsArr.selected.setTime(lyricsStartTime);
 
     const lyricsIdx = lyricsArr.indexOf(lyricsArr.selected);
@@ -213,7 +131,7 @@ export default class HandleMouseEvent {
     }
   }
 
-  sizeChangeLyrics(e, lyricsArr, scrollAmount) {
+  _sizeChangeLyrics(e, lyricsArr, scrollAmount) {
     const lyricsIdx = lyricsArr.indexOf(lyricsArr.selected);
     const nextLyrics = lyricsArr[lyricsIdx + 1];
     const prevLyrics = lyricsArr[lyricsIdx - 1];
@@ -223,11 +141,15 @@ export default class HandleMouseEvent {
         {
           // 왼쪽 끝에서 크기 조절
           // div의 시작점 = 마우스의 위치 - leftDivDelta - 스크롤 된 길이
-          const lyricsStartTime = e.clientX - this.leftDivDelta - scrollAmount;
-          const divStartPos = this.mouseDownPos - this.leftDivDelta;
+          const lyricsStartTime =
+            e.clientX - this.divInfo.leftFromCursor + scrollAmount;
+          const divStartPos =
+            this.divInfo.mouseDownPos -
+            this.divInfo.leftFromCursor +
+            scrollAmount;
 
           const lyricsLength =
-            this.originalLength - (lyricsStartTime - divStartPos);
+            this.divInfo.originalLength - (lyricsStartTime - divStartPos);
 
           lyricsArr.selected.setTime(lyricsStartTime);
           lyricsArr.selected.setLength(lyricsLength);
@@ -244,7 +166,7 @@ export default class HandleMouseEvent {
           if (lyricsStartTime < divStartLimit) {
             lyricsArr.selected.setTime(divStartLimit);
             lyricsArr.selected.setLength(
-              this.originalLength - (divStartLimit - divStartPos),
+              this.divInfo.originalLength - (divStartLimit - divStartPos),
             );
           }
         }
@@ -253,9 +175,13 @@ export default class HandleMouseEvent {
         {
           // 오른쪽 끝에서 크기 조절
           // div의 길이 = 마우스의 위치 + rightDivDelta - div의 실제 위치 - 스크롤 된 길이
-          const divStartPos = lyricsArr.selected.getDivStartPos();
+          const divStartPos =
+            lyricsArr.selected.getDivStartPos() + scrollAmount;
           const lyricsLength =
-            e.clientX + this.rightDivDelta - divStartPos - scrollAmount;
+            e.clientX +
+            this.divInfo.rightFromCursor +
+            scrollAmount -
+            divStartPos;
           lyricsArr.selected.setLength(lyricsLength);
 
           // 현재 div의 끝점
@@ -282,9 +208,12 @@ export default class HandleMouseEvent {
     }
   }
 
-  initMouseEvent() {
-    this.leftDivDelta = null;
-    this.rightDivDelta = null;
+  initMouseState() {
+    this.divInfo.leftFromCursor = null;
+    this.divInfo.rightFromCursor = null;
+    this.divInfo.mouseDownPos = null;
+    this.divInfo.originalLength = null;
+
     this.isMouseDown = false;
     this.isMouseMoving = false;
     this.isSizeChanging = false;
