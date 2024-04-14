@@ -79,7 +79,7 @@ export default class HandleMouseEvent {
     }
   }
 
-  setMousemoveState(e, lyricsArr, scrollAmount) {
+  setMousemoveState(e, lyricsArr, scrollAmount, layerWidth) {
     this.isMouseMoving = true;
 
     const isDragging = !this.isSizeChanging && this.isMouseDown;
@@ -87,18 +87,18 @@ export default class HandleMouseEvent {
 
     if (isDragging) {
       // 가사가 선택됐고 크기조절중이 아닐때
-      this._moveLyrics(e, lyricsArr, scrollAmount);
+      this._moveLyrics(e, lyricsArr, scrollAmount, layerWidth);
     } else if (isSizeChanging) {
       // 가사가 선택됐고 크기조절중일때
-      this._sizeChangeLyrics(e, lyricsArr, scrollAmount);
+      this._sizeChangeLyrics(e, lyricsArr, scrollAmount, layerWidth);
     }
   }
 
-  _moveLyrics(e, lyricsArr, scrollAmount) {
+  _moveLyrics(e, lyricsArr, scrollAmount, layerWidth) {
     // 현재 div의 시간
     // 브라우저 마우스 위치 - div 시작점 위치 + 스크롤 된 길이
     const lyricsStartTime =
-      e.clientX - this.divInfo.leftFromCursor + scrollAmount;
+      e.clientX - this.divInfo.leftFromCursor + scrollAmount - layerWidth;
     lyricsArr.selected.setTime(lyricsStartTime);
 
     const lyricsIdx = lyricsArr.indexOf(lyricsArr.selected);
@@ -131,7 +131,7 @@ export default class HandleMouseEvent {
     }
   }
 
-  _sizeChangeLyrics(e, lyricsArr, scrollAmount) {
+  _sizeChangeLyrics(e, lyricsArr, scrollAmount, layerWidth) {
     const lyricsIdx = lyricsArr.indexOf(lyricsArr.selected);
     const nextLyrics = lyricsArr[lyricsIdx + 1];
     const prevLyrics = lyricsArr[lyricsIdx - 1];
@@ -142,11 +142,13 @@ export default class HandleMouseEvent {
           // 왼쪽 끝에서 크기 조절
           // div의 시작점 = 마우스의 위치 - leftDivDelta - 스크롤 된 길이
           const lyricsStartTime =
-            e.clientX - this.divInfo.leftFromCursor + scrollAmount;
+            e.clientX - this.divInfo.leftFromCursor + scrollAmount - layerWidth;
           const divStartPos =
             this.divInfo.mouseDownPos -
             this.divInfo.leftFromCursor +
-            scrollAmount;
+            scrollAmount -
+            layerWidth -
+            1;
 
           const lyricsLength =
             this.divInfo.originalLength - (lyricsStartTime - divStartPos);
@@ -176,12 +178,13 @@ export default class HandleMouseEvent {
           // 오른쪽 끝에서 크기 조절
           // div의 길이 = 마우스의 위치 + rightDivDelta - div의 실제 위치 - 스크롤 된 길이
           const divStartPos =
-            lyricsArr.selected.getDivStartPos() + scrollAmount;
+            lyricsArr.selected.getDivStartPos() + scrollAmount - layerWidth;
           const lyricsLength =
             e.clientX +
             this.divInfo.rightFromCursor +
             scrollAmount -
-            divStartPos;
+            divStartPos -
+            layerWidth;
           lyricsArr.selected.setLength(lyricsLength);
 
           // 현재 div의 끝점
