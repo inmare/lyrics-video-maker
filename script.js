@@ -1,6 +1,7 @@
 import LyricsDiv from "./LyricsDiv";
 import LyricsArray from "./LyricsArray";
 import HandleMouseEvent from "./HandleMouseEvent";
+import LyricsInfo from "./LyricsInfo";
 import { LYRICS_FORMAT, SECOND_LEN_PX } from "./globals";
 
 // temp global variable
@@ -8,6 +9,7 @@ const tempTimelineLength = SECOND_LEN_PX * 120;
 
 const LYRICS_ARRAY = new LyricsArray(tempTimelineLength);
 const HANDLE_MOUSE_EVENT = new HandleMouseEvent();
+const LYRICS_INFO = new LyricsInfo();
 
 const addLyricsBtn = document.querySelector("#add-lyrics");
 addLyricsBtn.addEventListener("click", addLyricsDiv);
@@ -20,10 +22,16 @@ const markContainer = document.querySelector("#mark-container");
 const markTimeContainer = document.querySelector("#mark-time-container");
 const lyricsContainer = document.querySelector("#lyrics-container");
 
+const timeEditor = document.querySelectorAll("#lyrics-info input[type='text']");
+const lyricsEditor = document.querySelector("#lyrics-editor");
+
 document.addEventListener("mousedown", (e) => {
   // 클릭한 부분이 가사 div인지 확인
   const isLyricsClicked = e.target.closest(".lyrics") ? true : false;
   HANDLE_MOUSE_EVENT.setMousedownState(e, LYRICS_ARRAY, isLyricsClicked);
+  if (isLyricsClicked) {
+    LYRICS_INFO.displayLyricsInfo(LYRICS_ARRAY, timeEditor, lyricsEditor);
+  }
 });
 
 document.addEventListener("mousemove", (e) => {
@@ -44,6 +52,7 @@ document.addEventListener("mouseup", (e) => {
   // 마우스를 떼었을 때 기존에 클래스에 저장한 값 초기화
   const isLyricsDragged = LYRICS_ARRAY.selected instanceof LyricsDiv;
   if (isLyricsDragged) {
+    LYRICS_INFO.displayLyricsInfo(LYRICS_ARRAY, timeEditor, lyricsEditor);
     HANDLE_MOUSE_EVENT.initMouseState();
   }
 });
