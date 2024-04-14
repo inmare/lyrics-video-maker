@@ -12,9 +12,12 @@ const HANDLE_MOUSE_EVENT = new HandleMouseEvent();
 const addLyricsBtn = document.querySelector("#add-lyrics");
 addLyricsBtn.addEventListener("click", addLyricsDiv);
 
+const layerWrapper = document.querySelector("#layer-wrapper");
+
 const timelineWrapper = document.querySelector("#timeline-wrapper");
 const timeline = document.querySelector("#timeline");
 const markContainer = document.querySelector("#mark-container");
+const markTimeContainer = document.querySelector("#mark-time-container");
 const lyricsContainer = document.querySelector("#lyrics-container");
 
 document.addEventListener("mousedown", (e) => {
@@ -27,7 +30,13 @@ document.addEventListener("mousemove", (e) => {
   const isLyricsSelected = LYRICS_ARRAY.selected instanceof LyricsDiv;
   if (isLyricsSelected) {
     const scrollAmount = timelineWrapper.scrollLeft;
-    HANDLE_MOUSE_EVENT.setMousemoveState(e, LYRICS_ARRAY, scrollAmount);
+    const layerWidth = layerWrapper.getBoundingClientRect().width;
+    HANDLE_MOUSE_EVENT.setMousemoveState(
+      e,
+      LYRICS_ARRAY,
+      scrollAmount,
+      layerWidth,
+    );
   }
 });
 
@@ -44,14 +53,37 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function initTimeline() {
-  const markTimeGap = SECOND_LEN_PX;
   timeline.style.width = `${tempTimelineLength}px`;
+  const markGap = SECOND_LEN_PX;
 
-  for (let i = 0; i < tempTimelineLength; i += markTimeGap) {
+  for (let i = 0; i < tempTimelineLength; i += markGap) {
     const mark = document.createElement("div");
     mark.classList.add("mark");
     mark.style.left = `${i}px`;
     markContainer.appendChild(mark);
+  }
+
+  const markTimeGap = SECOND_LEN_PX * 5;
+  let time = 0;
+
+  for (let i = 0; i < tempTimelineLength; i += markTimeGap) {
+    if (tempTimelineLength - i < (markTimeGap / 5) * 2) break;
+
+    const markTime = document.createElement("p");
+    markTime.classList.add("mark-time");
+    markTime.innerText = `${formatSecond(time)}`;
+    markTime.style.left = `${i}px`;
+    markTimeContainer.appendChild(markTime);
+
+    time += 5;
+  }
+
+  function formatSecond(time) {
+    const min = Math.floor(time / 60);
+    const sec = time % 60;
+    const minStr = min < 10 ? `0${min}` : min.toString();
+    const secStr = sec < 10 ? `0${sec}` : sec.toString();
+    return `${minStr}:${secStr}`;
   }
 }
 
