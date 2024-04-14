@@ -10,10 +10,10 @@
     <div id="container">
       <div id="layer-wrapper">
         <div id="layer-lyrics" class="layer-container">
-          <div class="layer">Lyrics</div>
+          <div class="layer">가사</div>
         </div>
         <div id="layer-audio" class="layer-container">
-          <div class="layer">Audio</div>
+          <div class="layer">음원</div>
         </div>
       </div>
       <div id="timeline-wrapper">
@@ -26,9 +26,32 @@
       </div>
     </div>
 
-    <button id="add-lyrics">Add lyrics</button>
-    <div id="lyrics-list">
-      <h1>Lyrics list</h1>
+    <button id="add-lyrics">가사 추가</button>
+    <div id="lyrics-info">
+      <h1>가사 정보</h1>
+      <p>시작 시간&nbsp;</p>
+      <div class="timeinfo">
+        <input type="text" name="start-time-min" id="start-time-min" />
+        <p>:</p>
+        <input type="text" name="start-time-sec" id="start-time-sec" />
+        <p>:</p>
+        <input type="text" name="start-time-msec" id="start-time-msec" />
+      </div>
+      <p>종료 시간&nbsp;</p>
+      <div class="timeinfo">
+        <input type="text" name="end-time-min" id="end-time-min" />
+        <p>:</p>
+        <input type="text" name="end-time-sec" id="end-time-sec" />
+        <p>:</p>
+        <input type="text" name="end-time-msec" id="end-time-msec" />
+      </div>
+      <p>가사</p>
+      <textarea
+        name="lyrics-editor"
+        id="lyrics-editor"
+        cols="30"
+        rows="10"
+      ></textarea>
     </div>
     <script type="module" src="script.js"></script>
   </body>

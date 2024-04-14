@@ -210,3 +210,13 @@ body {
   border-radius: 0px;
   cursor: ew-resize;
 }
+
+.timeinfo {
+  display: flex;
+  flex-direction: row;
+}
+
+.timeinfo > input[type="text"] {
+  width: 30px;
+  font-size: 0.8rem;
+}
