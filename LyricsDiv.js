@@ -1,10 +1,13 @@
+import { SECOND_LEN_PX } from "./globals";
+
 export default class LyricsDiv {
   constructor({ length, time, context }) {
-    // set default values
     this._length = length;
     this._time = time;
     this._context = context;
-    // creative div
+    // 시간을 초 단위로 바꾸기
+    this._formattedTime = this._formatTime(time);
+    // div 생성하기
     this._div = this._initDiv();
     this._hightlightDiv = this._initHighlightDiv();
   }
@@ -12,11 +15,13 @@ export default class LyricsDiv {
   setLength(length) {
     this._length = length;
     this._div.style.width = `${length}px`;
+    this._formattedTime = this._formatTime(this._time, length);
   }
 
   setTime(time) {
     this._time = time;
     this._div.style.left = `${time}px`;
+    this._formattedTime = this._formatTime(time, this._length);
   }
 
   setContext(context) {
@@ -54,6 +59,51 @@ export default class LyricsDiv {
 
   toggleHighlight() {
     this._div.classList.toggle("lyrics-highlight");
+  }
+
+  _formatTime(time, length) {
+    const startTimePx = time;
+    const endTimePx = time + length;
+
+    const startTime = this._px2timeInfo(startTimePx);
+    const endTime = this._px2timeInfo(endTimePx);
+
+    return {
+      startTime: startTime,
+      endTime: endTime,
+    };
+  }
+
+  getFormattedStartTime() {
+    return this._formattedTime.startTime;
+  }
+
+  getFormattedEndTime() {
+    return this._formattedTime.endTime;
+  }
+
+  setStartTime(time) {
+    this._formattedTime.startTime = this._px2timeInfo(time);
+  }
+
+  setEndTime(time) {
+    this._formattedTime.endTime = this._px2timeInfo(time);
+  }
+
+  _px2timeInfo(timePx) {
+    const actualSecond = timePx / SECOND_LEN_PX;
+    const min = Math.floor(actualSecond / 60);
+    const sec = Math.floor(actualSecond) % 60;
+    const msec = Math.round((actualSecond - Math.floor(actualSecond)) * 1000);
+
+    const minStr = min.toString().padStart(2, "0");
+    const secStr = sec.toString().padStart(2, "0");
+    const msecStr = msec.toString().padStart(3, "0");
+
+    return {
+      num: [min, sec, msec],
+      str: [minStr, secStr, msecStr],
+    };
   }
 
   _initDiv() {
