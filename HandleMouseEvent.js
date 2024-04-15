@@ -1,22 +1,22 @@
 import LyricsDiv from "./LyricsDiv";
 
 export default class HandleMouseEvent {
-  // 마우스 이벤트 관련 this.변수
-  constructor() {
-    this.divInfo = {
-      leftFromCursor: null, // div의 시작지점에서 마우스의 위치, Number
-      rightFromCursor: null, // div의 끝지점에서 마우스의 위치, Number
-      mouseDownPos: null, // 마우스를 누르기 시작한 위치, Number
-      originalLength: null, // div의 원래 길이, Number
-    };
+  // 마우스 이벤트 관련 static 변수
+  static divInfo = {
+    leftFromCursor: null, // div의 시작지점에서 마우스의 위치, Number
+    rightFromCursor: null, // div의 끝지점에서 마우스의 위치, Number
+    mouseDownPos: null, // 마우스를 누르기 시작한 위치, Number
+    originalLength: null, // div의 원래 길이, Number
+  };
 
-    this.isMouseDown = false; // 마우스를 누르고 있는 상태인지
-    this.isMouseMoving = false; // 마우스를 움직이고 있는 상태인지
-    this.isSizeChanging = false; // 크기 조절 중인 상태인지
-    this.sizeChangeFrom = null; // 어디에서 크기조절을 시작했는지, "left" or "right"
-  }
+  static isMouseDown = false; // 마우스를 누르고 있는 상태인지
+  static isMouseMoving = false; // 마우스를 움직이고 있는 상태인지
+  static isSizeChanging = false; // 크기 조절 중인 상태인지
+  static sizeChangeFrom = null; // 어디에서 크기조절을 시작했는지, "left" or "right"
 
-  _saveMouseInfo(e, lyricsArr) {
+  constructor() {}
+
+  static _saveMouseInfo(e, lyricsArr) {
     // 마우스의 위치 및 현재 마우스를 누르고 있는 상태를 저장
     this.divInfo.leftFromCursor =
       e.clientX - lyricsArr.selected.getDivStartPos();
@@ -27,23 +27,19 @@ export default class HandleMouseEvent {
   }
 
   // 선택한 div highlight 추가
-  setMousedownState(e, lyricsArr, isLyricsClicked) {
+  static setMousedownState(e, lyricsArr, isLyricsClicked) {
     this.isMouseDown = true;
 
     if (isLyricsClicked) {
       let lyricsDiv = e.target.closest(".lyrics");
 
       // 현재 선택된 가사의 여부에 따라 lyricsArr.selected를 설정
-      if (lyricsArr.selected === null) {
-        lyricsArr.selected = lyricsArr.find(
-          (lyrics) => lyrics.getDiv() === lyricsDiv,
-        );
-      } else if (lyricsArr.selected instanceof LyricsDiv) {
+      if (lyricsArr.selected instanceof LyricsDiv) {
         lyricsArr.selected.disableHighlight();
-        lyricsArr.selected = lyricsArr.find(
-          (lyrics) => lyrics.getDiv() === lyricsDiv,
-        );
       }
+      lyricsArr.selected = lyricsArr.find(
+        (lyrics) => lyrics.getDiv() === lyricsDiv,
+      );
 
       this._enableHighlight(lyricsArr);
       this._setSizeChangeFrom(e);
@@ -53,19 +49,19 @@ export default class HandleMouseEvent {
     }
   }
 
-  _enableHighlight(lyricsArr) {
+  static _enableHighlight(lyricsArr) {
     lyricsArr.selected.enableHighlight();
   }
 
   // 선택된 div highlight 해제
-  _disableHighlight(lyricsArr) {
+  static _disableHighlight(lyricsArr) {
     if (lyricsArr.selected instanceof LyricsDiv) {
       lyricsArr.selected.disableHighlight();
       lyricsArr.selected = null;
     }
   }
 
-  _setSizeChangeFrom(e) {
+  static _setSizeChangeFrom(e) {
     // 만약 크기조절 div 부분을 선택했다면 크기 조절 중인 상태로 변경
     if (e.target.classList.contains("lyrics-size-change")) {
       this.isSizeChanging = true;
@@ -79,7 +75,7 @@ export default class HandleMouseEvent {
     }
   }
 
-  setMousemoveState(e, lyricsArr, scrollAmount, layerWidth) {
+  static setMousemoveState(e, lyricsArr, scrollAmount, layerWidth) {
     this.isMouseMoving = true;
 
     const isDragging = !this.isSizeChanging && this.isMouseDown;
@@ -94,7 +90,7 @@ export default class HandleMouseEvent {
     }
   }
 
-  _moveLyrics(e, lyricsArr, scrollAmount, layerWidth) {
+  static _moveLyrics(e, lyricsArr, scrollAmount, layerWidth) {
     // 현재 div의 시간
     // 브라우저 마우스 위치 - div 시작점 위치 + 스크롤 된 길이
     const lyricsStartTime =
@@ -131,7 +127,7 @@ export default class HandleMouseEvent {
     }
   }
 
-  _sizeChangeLyrics(e, lyricsArr, scrollAmount, layerWidth) {
+  static _sizeChangeLyrics(e, lyricsArr, scrollAmount, layerWidth) {
     const lyricsIdx = lyricsArr.indexOf(lyricsArr.selected);
     const nextLyrics = lyricsArr[lyricsIdx + 1];
     const prevLyrics = lyricsArr[lyricsIdx - 1];
@@ -211,7 +207,7 @@ export default class HandleMouseEvent {
     }
   }
 
-  initMouseState() {
+  static initMouseState() {
     this.divInfo.leftFromCursor = null;
     this.divInfo.rightFromCursor = null;
     this.divInfo.mouseDownPos = null;
