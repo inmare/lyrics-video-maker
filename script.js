@@ -3,13 +3,12 @@ import LyricsArray from "./LyricsArray";
 import HandleMouseEvent from "./HandleMouseEvent";
 import LyricsInfo from "./LyricsInfo";
 import { LYRICS_FORMAT, SECOND_LEN_PX } from "./globals";
+import * as PIXI from "pixi.js";
 
 // temp global variable
 const tempTimelineLength = SECOND_LEN_PX * 120;
 
 const LYRICS_ARRAY = new LyricsArray(tempTimelineLength);
-const HANDLE_MOUSE_EVENT = new HandleMouseEvent();
-const LYRICS_INFO = new LyricsInfo();
 
 const addLyricsBtn = document.querySelector("#add-lyrics");
 addLyricsBtn.addEventListener("click", addLyricsDiv);
@@ -25,12 +24,15 @@ const lyricsContainer = document.querySelector("#lyrics-container");
 const timeEditor = document.querySelectorAll("#lyrics-info input[type='text']");
 const lyricsEditor = document.querySelector("#lyrics-editor");
 
+const canvasContainer = document.querySelector("#canvas-container");
+const app = new PIXI.Application();
+
 document.addEventListener("mousedown", (e) => {
   // 클릭한 부분이 가사 div인지 확인
   const isLyricsClicked = e.target.closest(".lyrics") ? true : false;
-  HANDLE_MOUSE_EVENT.setMousedownState(e, LYRICS_ARRAY, isLyricsClicked);
+  HandleMouseEvent.setMousedownState(e, LYRICS_ARRAY, isLyricsClicked);
   if (isLyricsClicked) {
-    LYRICS_INFO.displayLyricsInfo(LYRICS_ARRAY, timeEditor, lyricsEditor);
+    LyricsInfo.displayLyricsInfo(LYRICS_ARRAY, timeEditor, lyricsEditor);
   }
 });
 
@@ -39,7 +41,7 @@ document.addEventListener("mousemove", (e) => {
   if (isLyricsSelected) {
     const scrollAmount = timelineWrapper.scrollLeft;
     const layerWidth = layerWrapper.getBoundingClientRect().width;
-    HANDLE_MOUSE_EVENT.setMousemoveState(
+    HandleMouseEvent.setMousemoveState(
       e,
       LYRICS_ARRAY,
       scrollAmount,
@@ -52,13 +54,37 @@ document.addEventListener("mouseup", (e) => {
   // 마우스를 떼었을 때 기존에 클래스에 저장한 값 초기화
   const isLyricsDragged = LYRICS_ARRAY.selected instanceof LyricsDiv;
   if (isLyricsDragged) {
-    LYRICS_INFO.displayLyricsInfo(LYRICS_ARRAY, timeEditor, lyricsEditor);
-    HANDLE_MOUSE_EVENT.initMouseState();
+    LyricsInfo.displayLyricsInfo(LYRICS_ARRAY, timeEditor, lyricsEditor);
+    HandleMouseEvent.initMouseState();
   }
 });
 
 document.addEventListener("DOMContentLoaded", () => {
   initTimeline();
+  initCanvas();
+  async function initCanvas() {
+    await app.init({
+      background: "#000000",
+      width: 320,
+      height: 180,
+    });
+    canvasContainer.appendChild(app.canvas);
+  }
+});
+
+lyricsEditor.addEventListener("focusout", (e) => {
+  if (LyricsInfo.lyricsDiv instanceof LyricsDiv) {
+    LyricsInfo.lyricsDiv.setContext(e.target.value);
+    const style = new PIXI.TextStyle({
+      fontFamily: "Arial",
+      fontSize: 36,
+      fill: "white",
+    });
+    const text = new PIXI.Text({ text: e.target.value, style });
+    text.x = 0;
+    text.y = 0;
+    app.stage.addChild(text);
+  }
 });
 
 function initTimeline() {
@@ -100,7 +126,8 @@ function addLyricsDiv() {
   const lyricsDiv = new LyricsDiv(LYRICS_FORMAT);
   lyricsDiv.setTime(0);
   lyricsDiv.setLength(SECOND_LEN_PX * 4);
-  lyricsDiv.setContext("Lyrics");
+  const random = Math.round(Math.random() * 100);
+  lyricsDiv.setContext("Lyrics" + random.toString().padStart(2, "0"));
 
   if (LYRICS_ARRAY.length > 0) {
     const lastSubtitle = LYRICS_ARRAY[LYRICS_ARRAY.length - 1];
@@ -109,5 +136,4 @@ function addLyricsDiv() {
 
   LYRICS_ARRAY.push(lyricsDiv);
   lyricsContainer.appendChild(lyricsDiv.getDiv());
-  // lyricsDiv.initHighlightDiv();
 }
