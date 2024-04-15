@@ -1,26 +1,24 @@
 export default class LyricsInfo {
-  constructor() {
-    this.startTime = null;
-    this.endTime = null;
-    this.lyrics = "";
-  }
+  static lyricsDiv;
 
-  displayLyricsInfo(lyricsArr, timeEditor, lyricsEditor) {
-    const lyricsObj = this._getFormattedLyrics(lyricsArr);
+  constructor() {}
 
-    timeEditor[0].value = lyricsObj.startTime.str[0];
-    timeEditor[1].value = lyricsObj.startTime.str[1];
-    timeEditor[2].value = lyricsObj.startTime.str[2];
-    timeEditor[3].value = lyricsObj.endTime.str[0];
-    timeEditor[4].value = lyricsObj.endTime.str[1];
-    timeEditor[5].value = lyricsObj.endTime.str[2];
+  static displayLyricsInfo(lyricsArr, timeEditor, lyricsEditor) {
+    this.lyricsDiv = lyricsArr.selected;
+    const lyricsObj = this._getFormattedLyrics();
+
+    timeEditor[0].value = lyricsObj.startTime.str[0]; // min
+    timeEditor[1].value = lyricsObj.startTime.str[1]; // sec
+    timeEditor[2].value = lyricsObj.startTime.str[2]; // msec
+    timeEditor[3].value = lyricsObj.endTime.str[0]; // min
+    timeEditor[4].value = lyricsObj.endTime.str[1]; // sec
+    timeEditor[5].value = lyricsObj.endTime.str[2]; // msec
     lyricsEditor.value = lyricsObj.lyrics;
   }
-  _getFormattedLyrics(lyricsArr) {
-    const lyrics = lyricsArr.selected;
-    const startTimeObj = lyrics.getFormattedStartTime();
-    const endTimeObj = lyrics.getFormattedEndTime();
-    const context = lyrics.getContext();
+  static _getFormattedLyrics() {
+    const startTimeObj = this.lyricsDiv.getFormattedStartTime();
+    const endTimeObj = this.lyricsDiv.getFormattedEndTime();
+    const context = this.lyricsDiv.getContext();
 
     return {
       startTime: startTimeObj,
