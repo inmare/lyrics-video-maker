@@ -1,4 +1,4 @@
-import LyricsDiv from "./LyricsDiv";
+import Lyrics from "./Lyrics";
 import LyricsArray from "./LyricsArray";
 import HandleMouseEvent from "./HandleMouseEvent";
 import LyricsInfo from "./LyricsInfo";
@@ -37,7 +37,7 @@ document.addEventListener("mousedown", (e) => {
 });
 
 document.addEventListener("mousemove", (e) => {
-  const isLyricsSelected = LYRICS_ARRAY.selected instanceof LyricsDiv;
+  const isLyricsSelected = LYRICS_ARRAY.selected instanceof Lyrics;
   if (isLyricsSelected) {
     const scrollAmount = timelineWrapper.scrollLeft;
     const layerWidth = layerWrapper.getBoundingClientRect().width;
@@ -52,7 +52,7 @@ document.addEventListener("mousemove", (e) => {
 
 document.addEventListener("mouseup", (e) => {
   // 마우스를 떼었을 때 기존에 클래스에 저장한 값 초기화
-  const isLyricsDragged = LYRICS_ARRAY.selected instanceof LyricsDiv;
+  const isLyricsDragged = LYRICS_ARRAY.selected instanceof Lyrics;
   if (isLyricsDragged) {
     LyricsInfo.displayLyricsInfo(LYRICS_ARRAY, timeEditor, lyricsEditor);
     HandleMouseEvent.initMouseState();
@@ -73,7 +73,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 lyricsEditor.addEventListener("focusout", (e) => {
-  if (LyricsInfo.lyricsDiv instanceof LyricsDiv) {
+  if (LyricsInfo.lyricsDiv instanceof Lyrics) {
     LyricsInfo.lyricsDiv.setContext(e.target.value);
     const style = new PIXI.TextStyle({
       fontFamily: "Arial",
@@ -123,9 +123,9 @@ function initTimeline() {
 }
 
 function addLyricsDiv() {
-  const lyricsDiv = new LyricsDiv(LYRICS_FORMAT);
+  const lyricsDiv = new Lyrics(LYRICS_FORMAT);
   lyricsDiv.setTime(0);
-  lyricsDiv.setLength(SECOND_LEN_PX * 4);
+  lyricsDiv.setDuration(SECOND_LEN_PX * 4);
   const random = Math.round(Math.random() * 100);
   lyricsDiv.setContext("Lyrics" + random.toString().padStart(2, "0"));
 

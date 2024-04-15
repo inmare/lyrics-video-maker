@@ -1,4 +1,4 @@
-import LyricsDiv from "./LyricsDiv";
+import Lyrics from "./Lyrics";
 
 export default class HandleMouseEvent {
   // 마우스 이벤트 관련 static 변수
@@ -34,7 +34,7 @@ export default class HandleMouseEvent {
       let lyricsDiv = e.target.closest(".lyrics");
 
       // 현재 선택된 가사의 여부에 따라 lyricsArr.selected를 설정
-      if (lyricsArr.selected instanceof LyricsDiv) {
+      if (lyricsArr.selected instanceof Lyrics) {
         lyricsArr.selected.disableHighlight();
       }
       lyricsArr.selected = lyricsArr.find(
@@ -55,7 +55,7 @@ export default class HandleMouseEvent {
 
   // 선택된 div highlight 해제
   static _disableHighlight(lyricsArr) {
-    if (lyricsArr.selected instanceof LyricsDiv) {
+    if (lyricsArr.selected instanceof Lyrics) {
       lyricsArr.selected.disableHighlight();
       lyricsArr.selected = null;
     }

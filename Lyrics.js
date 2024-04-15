@@ -1,27 +1,31 @@
 import { SECOND_LEN_PX } from "./globals";
 
-export default class LyricsDiv {
-  constructor({ length, time, context }) {
-    this._length = length;
-    this._time = time;
+export default class Lyrics {
+  constructor({ startTime, duration, context }) {
+    // time, duration : 소수점 세자리까지 표현된 초
+    this._startTime = startTime;
+    this._endTime = startTime + duration;
+    this._duration = duration;
     this._context = context;
     // 시간을 초 단위로 바꾸기
-    this._formattedTime = this._formatTime(time);
+    // this._formattedTime = this._formatTime(time);
     // div 생성하기
     this._div = this._initDiv();
     this._hightlightDiv = this._initHighlightDiv();
   }
 
-  setLength(length) {
-    this._length = length;
-    this._div.style.width = `${length}px`;
-    this._formattedTime = this._formatTime(this._time, length);
+  setTime(startTime) {
+    this._startTime = startTime;
+    const timePx = this._time2Px(startTime);
+    this._div.style.left = `${timePx}px`;
+    // this._formattedTime = this._formatTime(time, this._length);
   }
 
-  setTime(time) {
-    this._time = time;
-    this._div.style.left = `${time}px`;
-    this._formattedTime = this._formatTime(time, this._length);
+  setDuration(duration) {
+    this._duration = duration;
+    const durationPX = this._duration2Px(duration);
+    this._div.style.width = `${durationPX}px`;
+    // this._formattedTime = this._formatTime(this._time, length);
   }
 
   setContext(context) {
@@ -29,12 +33,20 @@ export default class LyricsDiv {
     this._setDivContext(context);
   }
 
-  getLength() {
-    return this._length;
+  _time2Px(time) {
+    return Math.round(time * SECOND_LEN_PX);
   }
 
-  getTime() {
-    return this._time;
+  _duration2Px(duration) {
+    return Math.round(duration * SECOND_LEN_PX);
+  }
+
+  getDuration() {
+    return this._duration;
+  }
+
+  getStartTime() {
+    return this._startTime;
   }
 
   getContext() {
@@ -82,14 +94,6 @@ export default class LyricsDiv {
     return this._formattedTime.endTime;
   }
 
-  setStartTime(time) {
-    this._formattedTime.startTime = this._px2timeInfo(time);
-  }
-
-  setEndTime(time) {
-    this._formattedTime.endTime = this._px2timeInfo(time);
-  }
-
   _px2timeInfo(timePx) {
     const actualSecond = timePx / SECOND_LEN_PX;
     const min = Math.floor(actualSecond / 60);
@@ -109,7 +113,7 @@ export default class LyricsDiv {
   _initDiv() {
     const div = document.createElement("div");
     div.style.width = `${this._length}px`;
-    div.style.left = `${this._time}px`;
+    div.style.left = `${this._startTime}px`;
     div.classList.add("lyrics");
 
     const p = document.createElement("p");
