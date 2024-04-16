@@ -3,12 +3,14 @@ import LyricsArray from "./LyricsArray";
 import HandleMouseEvent from "./HandleMouseEvent";
 import LyricsInfo from "./LyricsInfo";
 import Project from "./Project";
+import { time2px } from "./utils";
 import { LYRICS_FORMAT, SECOND_LEN_PX } from "./globals";
-// import * as PIXI from "pixi.js";
+import * as PIXI from "pixi.js";
 
 // temp global variable
-const tempTimelineLength = SECOND_LEN_PX * 120;
-Project.length = tempTimelineLength;
+const tempTimeLineSec = 120;
+const tempTimelineLength = SECOND_LEN_PX * tempTimeLineSec;
+Project.length = tempTimeLineSec;
 
 const addLyricsBtn = document.querySelector("#add-lyrics");
 addLyricsBtn.addEventListener("click", addLyricsDiv);
@@ -24,8 +26,8 @@ const lyricsContainer = document.querySelector("#lyrics-container");
 const timeEditor = document.querySelectorAll("#lyrics-info input[type='text']");
 const lyricsEditor = document.querySelector("#lyrics-editor");
 
-// const canvasContainer = document.querySelector("#canvas-container");
-// const app = new PIXI.Application();
+const canvasContainer = document.querySelector("#canvas-container");
+const app = new PIXI.Application();
 
 document.addEventListener("mousedown", (e) => {
   // 클릭한 부분이 가사 div인지 확인
@@ -56,15 +58,18 @@ document.addEventListener("mouseup", (e) => {
 
 document.addEventListener("DOMContentLoaded", () => {
   initTimeline();
-  // initCanvas();
-  // async function initCanvas() {
-  //   await app.init({
-  //     background: "#000000",
-  //     width: 320,
-  //     height: 180,
-  //   });
-  //   canvasContainer.appendChild(app.canvas);
-  // }
+  initCanvas();
+  async function initCanvas() {
+    await app.init({
+      background: "#000000",
+      width: 320,
+      height: 180,
+    });
+    canvasContainer.appendChild(app.canvas);
+
+    const text = new PIXI.Text({ text: "Hello, World!", fill: "white" });
+    app.stage.appendChild(text);
+  }
 });
 
 lyricsEditor.addEventListener("focusout", (e) => {
@@ -83,7 +88,7 @@ lyricsEditor.addEventListener("focusout", (e) => {
 });
 
 function initTimeline() {
-  timeline.style.width = `${tempTimelineLength}px`;
+  timeline.style.width = `${time2px(Project.length)}px`;
   const markGap = SECOND_LEN_PX;
 
   for (let i = 0; i < tempTimelineLength; i += markGap) {
