@@ -1,6 +1,6 @@
 import Lyrics from "./Lyrics";
 import LyricsArray from "./LyricsArray";
-import HandleMouseEvent from "./HandleMouseEvent";
+import LyricsMouseEvent from "./LyricsMouseEvent";
 import LyricsInfo from "./LyricsInfo";
 import Project from "./Project";
 import { time2px } from "./utils";
@@ -32,7 +32,7 @@ const app = new PIXI.Application();
 document.addEventListener("mousedown", (e) => {
   // 클릭한 부분이 가사 div인지 확인
   const isLyricsClicked = e.target.closest(".lyrics") ? true : false;
-  HandleMouseEvent.setMousedownState(e, isLyricsClicked);
+  LyricsMouseEvent.setMousedownState(e, isLyricsClicked);
   if (isLyricsClicked) {
     LyricsInfo.displayLyricsInfo(timeEditor, lyricsEditor);
   }
@@ -43,7 +43,7 @@ document.addEventListener("mousemove", (e) => {
   if (isLyricsSelected) {
     const scrollAmount = timelineWrapper.scrollLeft;
     const layerWidth = layerWrapper.getBoundingClientRect().width;
-    HandleMouseEvent.setMousemoveState(e, scrollAmount, layerWidth);
+    LyricsMouseEvent.setMousemoveState(e, scrollAmount, layerWidth);
   }
 });
 
@@ -52,7 +52,7 @@ document.addEventListener("mouseup", (e) => {
   const isLyricsDragged = LyricsArray.selected instanceof Lyrics;
   if (isLyricsDragged) {
     LyricsInfo.displayLyricsInfo(timeEditor, lyricsEditor);
-    HandleMouseEvent.initMouseState();
+    LyricsMouseEvent.initMouseState();
   }
 });
 

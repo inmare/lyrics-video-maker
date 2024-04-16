@@ -2,7 +2,7 @@ import Lyrics from "./Lyrics";
 import LyricsArray from "./LyricsArray";
 import { time2px, px2time } from "./utils";
 
-export default class HandleMouseEvent {
+export default class LyricsMouseEvent {
   // 마우스 이벤트 관련 static 변수
   static divInfo = {
     leftFromCursor: null, // div의 시작지점에서 마우스의 위치, Number
