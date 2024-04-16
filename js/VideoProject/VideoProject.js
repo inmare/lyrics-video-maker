@@ -1,4 +1,4 @@
-export default class Projcet {
+export default class VideoProject {
   static length;
   constructor() {}
 }

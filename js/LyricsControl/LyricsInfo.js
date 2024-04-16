@@ -1,5 +1,5 @@
 import LyricsArray from "./LyricsArray";
-import { time2str } from "./utils";
+import { time2str } from "../Misc/utils";
 
 export default class LyricsInfo {
   static lyrics;

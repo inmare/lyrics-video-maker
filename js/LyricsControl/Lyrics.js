@@ -1,5 +1,4 @@
-import { time2px, px2time } from "./utils";
-import { SECOND_LEN_PX } from "./globals";
+import { time2px, px2time } from "../Misc/utils";
 
 export default class Lyrics {
   constructor({ startTime, duration, context }) {
@@ -83,35 +82,6 @@ export default class Lyrics {
   toggleHighlight() {
     this._div.classList.toggle("lyrics-highlight");
   }
-
-  // _formatTime(time, length) {
-  //   const startTimePx = time;
-  //   const endTimePx = time + length;
-
-  //   const startTime = this._px2timeInfo(startTimePx);
-  //   const endTime = this._px2timeInfo(endTimePx);
-
-  //   return {
-  //     startTime: startTime,
-  //     endTime: endTime,
-  //   };
-  // }
-
-  // _px2timeInfo(timePx) {
-  //   const actualSecond = timePx / SECOND_LEN_PX;
-  //   const min = Math.floor(actualSecond / 60);
-  //   const sec = Math.floor(actualSecond) % 60;
-  //   const msec = Math.round((actualSecond - Math.floor(actualSecond)) * 1000);
-
-  //   const minStr = min.toString().padStart(2, "0");
-  //   const secStr = sec.toString().padStart(2, "0");
-  //   const msecStr = msec.toString().padStart(3, "0");
-
-  //   return {
-  //     num: [min, sec, msec],
-  //     str: [minStr, secStr, msecStr],
-  //   };
-  // }
 
   _initDiv() {
     const div = document.createElement("div");

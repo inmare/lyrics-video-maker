@@ -1,16 +1,16 @@
-import Lyrics from "./Lyrics";
-import LyricsArray from "./LyricsArray";
-import LyricsMouseEvent from "./LyricsMouseEvent";
-import LyricsInfo from "./LyricsInfo";
-import Project from "./Project";
-import { time2px } from "./utils";
-import { LYRICS_FORMAT, SECOND_LEN_PX } from "./globals";
+import Lyrics from "./js/LyricsControl/Lyrics";
+import LyricsArray from "./js/LyricsControl/LyricsArray";
+import LyricsMouseEvent from "./js/LyricsControl/LyricsMouseEvent";
+import LyricsInfo from "./js/LyricsControl/LyricsInfo";
+import VideoProject from "./js/VideoProject/VideoProject";
+import { time2px } from "./js/Misc/utils";
+import { LYRICS_FORMAT, SECOND_LEN_PX } from "./js/Misc/globals";
 import * as PIXI from "pixi.js";
 
 // temp global variable
 const tempTimeLineSec = 120;
 const tempTimelineLength = SECOND_LEN_PX * tempTimeLineSec;
-Project.length = tempTimeLineSec;
+VideoProject.length = tempTimeLineSec;
 
 const addLyricsBtn = document.querySelector("#add-lyrics");
 addLyricsBtn.addEventListener("click", addLyricsDiv);
@@ -68,7 +68,7 @@ document.addEventListener("DOMContentLoaded", () => {
     canvasContainer.appendChild(app.canvas);
 
     const text = new PIXI.Text({ text: "Hello, World!", fill: "white" });
-    app.stage.appendChild(text);
+    app.stage.addChild(text);
   }
 });
 
@@ -88,7 +88,7 @@ lyricsEditor.addEventListener("focusout", (e) => {
 });
 
 function initTimeline() {
-  timeline.style.width = `${time2px(Project.length)}px`;
+  timeline.style.width = `${time2px(VideoProject.length)}px`;
   const markGap = SECOND_LEN_PX;
 
   for (let i = 0; i < tempTimelineLength; i += markGap) {
