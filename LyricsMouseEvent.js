@@ -1,227 +1,205 @@
 import Lyrics from "./Lyrics";
 import LyricsArray from "./LyricsArray";
-import { time2px, px2time } from "./utils";
+import LyricsMouseEvent from "./LyricsMouseEvent";
+import LyricsInfo from "./LyricsInfo";
+import Project from "./Project";
+import { time2px } from "./utils";
+import { LYRICS_FORMAT, SECOND_LEN_PX } from "./globals";
+import * as PIXI from "pixi.js";
 
-export default class LyricsMouseEvent {
-  // 마우스 이벤트 관련 static 변수
-  static divInfo = {
-    leftFromCursor: null, // div의 시작지점에서 마우스의 위치, Number
-    rightFromCursor: null, // div의 끝지점에서 마우스의 위치, Number
-    mouseDownPos: null, // 마우스를 누르기 시작한 위치, Number
-    originalLength: null, // div의 원래 길이, Number
-  };
+// temp global variable
+const tempTimeLineSec = 120;
+const tempTimelineLength = SECOND_LEN_PX * tempTimeLineSec;
+Project.length = tempTimeLineSec;
 
-  static isMouseDown = false; // 마우스를 누르고 있는 상태인지
-  static isMouseMoving = false; // 마우스를 움직이고 있는 상태인지
-  static isSizeChanging = false; // 크기 조절 중인 상태인지
-  static sizeChangeFrom = null; // 어디에서 크기조절을 시작했는지, "left" or "right"
+const addLyricsBtn = document.querySelector("#add-lyrics");
+addLyricsBtn.addEventListener("click", addLyricsDiv);
 
-  constructor() {}
+const layerWrapper = document.querySelector("#layer-wrapper");
 
-  static _saveMouseInfo(e) {
-    // 마우스의 위치 및 현재 마우스를 누르고 있는 상태를 저장
-    this.divInfo.leftFromCursor =
-      e.clientX - LyricsArray.selected.getDivStartPos();
-    const durationPx = LyricsArray.selected.getDurationPx();
-    this.divInfo.rightFromCursor = durationPx - this.divInfo.leftFromCursor;
-    this.divInfo.originalLength = durationPx;
-    this.divInfo.mouseDownPos = e.clientX;
-  }
+const timelineWrapper = document.querySelector("#timeline-wrapper");
+const timeline = document.querySelector("#timeline");
+const markContainer = document.querySelector("#mark-container");
+const markTimeContainer = document.querySelector("#mark-time-container");
+const lyricsContainer = document.querySelector("#lyrics-container");
+const playbar = document.querySelector("#playbar");
 
-  // 선택한 div highlight 추가
-  static setMousedownState(e, isLyricsClicked) {
-    this.isMouseDown = true;
+const timeEditor = document.querySelectorAll("#lyrics-info input[type='text']");
+const lyricsEditor = document.querySelector("#lyrics-editor");
 
-    if (isLyricsClicked) {
-      let lyricsDiv = e.target.closest(".lyrics");
+const canvasContainer = document.querySelector("#canvas-container");
+const app = new PIXI.Application();
+const container = new PIXI.Container();
+const ticker = new PIXI.Ticker();
 
-      // 현재 선택된 가사의 여부에 따라 lyricsArr.selected를 설정
-      if (LyricsArray.selected instanceof Lyrics) {
-        LyricsArray.selected.disableHighlight();
-      }
-      LyricsArray.selected = LyricsArray.find(
-        (lyrics) => lyrics.getDiv() === lyricsDiv,
-      );
+const style = new PIXI.TextStyle({
+  fontFamily: "Arial",
+  fontSize: 12,
+  fill: "white",
+});
+const text = new PIXI.Text({ text: "", style });
+text.x = 0;
+text.y = 0;
+// container.removeChildren(0);
+container.addChild(text);
 
-      this._enableHighlight();
-      this._setSizeChangeFrom(e);
-      this._saveMouseInfo(e);
-    } else {
-      this._disableHighlight();
-    }
-  }
+let firstTime = null;
+let lastTime = null;
+const frame30 = 1000 / 30;
+let lyricsIdx = 0;
+let l = null;
 
-  static _enableHighlight() {
-    LyricsArray.selected.enableHighlight();
-  }
+ticker.autoStart = false;
+ticker.add(() => {
+  // console.log(ticker.deltaMS);
+  if (lastTime === null) {
+    firstTime = Date.now();
+    lastTime = Date.now();
+  } else {
+    const deltaTime = Date.now() - lastTime;
+    if (deltaTime > frame30) {
+      lastTime = Date.now();
+      const deltaTime = lastTime - firstTime;
+      const min = Math.floor(deltaTime / 60000);
+      const sec = Math.floor((deltaTime % 60000) / 1000);
+      const msec = deltaTime % 1000;
+      const timeSecond = min * 60 + sec + msec / 1000;
+      playbar.style.left = `${time2px(timeSecond)}px`;
 
-  // 선택된 div highlight 해제
-  static _disableHighlight() {
-    if (LyricsArray.selected instanceof Lyrics) {
-      LyricsArray.selected.disableHighlight();
-      LyricsArray.selected = null;
-    }
-  }
-
-  static _setSizeChangeFrom(e) {
-    // 만약 크기조절 div 부분을 선택했다면 크기 조절 중인 상태로 변경
-    if (e.target.classList.contains("lyrics-size-change")) {
-      this.isSizeChanging = true;
-      if (e.target.parentElement.firstElementChild === e.target) {
-        this.sizeChangeFrom = "left";
-      } else if (e.target.parentElement.lastElementChild === e.target) {
-        this.sizeChangeFrom = "right";
-      }
-    } else {
-      this.isSizeChanging = false;
-    }
-  }
-
-  static setMousemoveState(e, scrollAmount, layerWidth) {
-    this.isMouseMoving = true;
-
-    const isDragging = !this.isSizeChanging && this.isMouseDown;
-    const isSizeChanging = this.isSizeChanging;
-
-    if (isDragging) {
-      // 가사가 선택됐고 크기조절중이 아닐때
-      this._moveLyrics(e, scrollAmount, layerWidth);
-    } else if (isSizeChanging) {
-      // 가사가 선택됐고 크기조절중일때
-      this._sizeChangeLyrics(e, scrollAmount, layerWidth);
-    }
-  }
-
-  static _moveLyrics(e, scrollAmount, layerWidth) {
-    // 현재 div의 시간
-    // 브라우저 마우스 위치 - div 시작점 위치 + 스크롤 된 길이
-    const lyricsStartTime =
-      e.clientX - this.divInfo.leftFromCursor + scrollAmount - layerWidth;
-    LyricsArray.selected.setStartTimePx(lyricsStartTime);
-
-    const lyricsIdx = LyricsArray.indexOf(LyricsArray.selected);
-    const nextLyrics = LyricsArray.getLyrics(lyricsIdx + 1);
-    const prevLyrics = LyricsArray.getLyrics(lyricsIdx - 1);
-    const currentDivEnd =
-      lyricsStartTime + LyricsArray.selected.getDurationPx();
-    const currentDivStart = lyricsStartTime;
-
-    let divEndLimit;
-    let divStartLimit;
-
-    // 이전 가사와 이후 가사의 존재 여부에 따라 div의 시작점과 끝점을 제한
-    if (nextLyrics) {
-      divEndLimit = nextLyrics.getStartTimePx();
-    } else if (!nextLyrics && lyricsIdx === LyricsArray.getLength() - 1) {
-      divEndLimit = LyricsArray.timelineLength - 1;
-    }
-
-    if (prevLyrics) {
-      divStartLimit = prevLyrics.getStartTimePx() + prevLyrics.getDurationPx();
-    } else if (!prevLyrics && lyricsIdx === 0) {
-      divStartLimit = 0;
-    }
-
-    // div의 위치 제한
-    if (currentDivEnd > divEndLimit) {
-      LyricsArray.selected.setStartTimePx(
-        divEndLimit - LyricsArray.selected.getDurationPx(),
-      );
-    } else if (currentDivStart < divStartLimit) {
-      LyricsArray.selected.setStartTimePx(divStartLimit);
-    }
-  }
-
-  static _sizeChangeLyrics(e, scrollAmount, layerWidth) {
-    const lyricsIdx = LyricsArray.indexOf(LyricsArray.selected);
-    const nextLyrics = LyricsArray.getLyrics(lyricsIdx + 1);
-    const prevLyrics = LyricsArray.getLyrics(lyricsIdx - 1);
-
-    switch (this.sizeChangeFrom) {
-      case "left":
-        {
-          // 왼쪽 끝에서 크기 조절
-          // div의 시작점 = 마우스의 위치 - leftDivDelta - 스크롤 된 길이
-          const lyricsStartTime =
-            e.clientX - this.divInfo.leftFromCursor + scrollAmount - layerWidth;
-          const divStartPos =
-            this.divInfo.mouseDownPos -
-            this.divInfo.leftFromCursor +
-            scrollAmount -
-            layerWidth -
-            1;
-
-          const lyricsLength =
-            this.divInfo.originalLength - (lyricsStartTime - divStartPos);
-
-          LyricsArray.selected.setStartTimePx(lyricsStartTime);
-          LyricsArray.selected.setDurationPx(lyricsLength);
-
-          let divStartLimit;
-          if (prevLyrics) {
-            // div의 시작점 제한 = 이전 가사의 끝점
-            divStartLimit =
-              prevLyrics.getStartTimePx() + prevLyrics.getDurationPx();
-          } else if (!prevLyrics && lyricsIdx === 0) {
-            // div의 시작점 제한 = 타임라인의 시작
-            divStartLimit = 0;
-          }
-
-          if (lyricsStartTime < divStartLimit) {
-            LyricsArray.selected.setStartTimePx(divStartLimit);
-            LyricsArray.selected.setDurationPx(
-              this.divInfo.originalLength - (divStartLimit - divStartPos),
-            );
-          }
+      l = LyricsArray.getLyrics(lyricsIdx);
+      if (l) {
+        const lStartTime = l.getStartTime();
+        const lEndTime = l.getEndTime();
+        if (lStartTime <= timeSecond && timeSecond <= lEndTime) {
+        } else if (lStartTime < timeSecond || timeSecond > lEndTime) {
+          lyricsIdx++;
         }
-        break;
-      case "right":
-        {
-          // 오른쪽 끝에서 크기 조절
-          // div의 길이 = 마우스의 위치 + rightDivDelta - div의 실제 위치 - 스크롤 된 길이
-          const divStartPos =
-            LyricsArray.selected.getDivStartPos() + scrollAmount - layerWidth;
-          const lyricsLength =
-            e.clientX +
-            this.divInfo.rightFromCursor +
-            scrollAmount -
-            divStartPos -
-            layerWidth;
-          LyricsArray.selected.setDurationPx(lyricsLength);
-
-          // 현재 div의 끝점
-          const currentDivEnd = divStartPos + lyricsLength;
-
-          // div의 크기 제한
-          let divEndLimit;
-          if (nextLyrics) {
-            // div의 크기제한 = 다음 가사의 시작점
-            // + 1을 해야지 다음 가사의 사이에 틈이 생기지 않음
-            divEndLimit = nextLyrics.getStartTimePx() + 1;
-          } else if (!nextLyrics && lyricsIdx === LyricsArray.getLength() - 1) {
-            // 다음 가사가 없을 때 div의 크기제한 = 타임라인의 끝
-            divEndLimit = LyricsArray.timelineLength + 1;
-          }
-
-          if (currentDivEnd > divEndLimit) {
-            LyricsArray.selected.setDurationPx(divEndLimit - divStartPos);
-          }
+        l = LyricsArray.getLyrics(lyricsIdx);
+        if (timeSecond < lStartTime || timeSecond > lEndTime) {
+          text.text = "";
+        } else {
+          text.text = l.getContext();
         }
-        break;
-      default:
-        break;
+      }
     }
   }
+});
 
-  static initMouseState() {
-    this.divInfo.leftFromCursor = null;
-    this.divInfo.rightFromCursor = null;
-    this.divInfo.mouseDownPos = null;
-    this.divInfo.originalLength = null;
+const playVideoBtn = document.querySelector("#play-video");
+let play = false;
 
-    this.isMouseDown = false;
-    this.isMouseMoving = false;
-    this.isSizeChanging = false;
-    this.sizeChangeFrom = null;
+document.addEventListener("mousedown", (e) => {
+  // 클릭한 부분이 가사 div인지 확인
+  const isLyricsClicked = e.target.closest(".lyrics") ? true : false;
+  LyricsMouseEvent.setMousedownState(e, isLyricsClicked);
+  if (isLyricsClicked) {
+    LyricsInfo.displayLyricsInfo(timeEditor, lyricsEditor);
   }
+});
+
+document.addEventListener("mousemove", (e) => {
+  const isLyricsSelected = LyricsArray.selected instanceof Lyrics;
+  if (isLyricsSelected) {
+    const scrollAmount = timelineWrapper.scrollLeft;
+    const layerWidth = layerWrapper.getBoundingClientRect().width;
+    LyricsMouseEvent.setMousemoveState(e, scrollAmount, layerWidth);
+  }
+});
+
+document.addEventListener("mouseup", (e) => {
+  // 마우스를 떼었을 때 기존에 클래스에 저장한 값 초기화
+  const isLyricsDragged = LyricsArray.selected instanceof Lyrics;
+  if (isLyricsDragged) {
+    LyricsInfo.displayLyricsInfo(timeEditor, lyricsEditor);
+    LyricsMouseEvent.initMouseState();
+  }
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+  initTimeline();
+  initCanvas();
+  async function initCanvas() {
+    await app.init({
+      background: "#000000",
+      width: 320,
+      height: 180,
+    });
+    canvasContainer.appendChild(app.canvas);
+    app.stage.addChild(container);
+  }
+});
+
+lyricsEditor.addEventListener("focusout", (e) => {
+  if (LyricsInfo.lyrics instanceof Lyrics) {
+    LyricsInfo.lyrics.setContext(e.target.value);
+  }
+});
+
+playVideoBtn.addEventListener("click", (e) => {
+  play = !play;
+  if (play) {
+    ticker.start();
+    e.target.innerText = "영상 정지";
+  } else {
+    ticker.stop();
+    e.target.innerText = "영상 재생";
+    playbar.style.left = null;
+    firstTime = null;
+    lastTime = null;
+    lyricsIdx = 0;
+    l = null;
+  }
+});
+
+function initTimeline() {
+  timeline.style.width = `${time2px(Project.length)}px`;
+  const markGap = SECOND_LEN_PX;
+
+  for (let i = 0; i < tempTimelineLength; i += markGap) {
+    const mark = document.createElement("div");
+    mark.classList.add("mark");
+    mark.style.left = `${i}px`;
+    markContainer.appendChild(mark);
+  }
+
+  const markTimeGap = SECOND_LEN_PX * 5;
+  let time = 0;
+
+  for (let i = 0; i < tempTimelineLength; i += markTimeGap) {
+    if (tempTimelineLength - i < (markTimeGap / 5) * 2) break;
+
+    const markTime = document.createElement("p");
+    markTime.classList.add("mark-time");
+    markTime.innerText = `${formatSecond(time)}`;
+    markTime.style.left = `${i}px`;
+    markTimeContainer.appendChild(markTime);
+
+    time += 5;
+  }
+
+  function formatSecond(time) {
+    const min = Math.floor(time / 60);
+    const sec = time % 60;
+    const minStr = min < 10 ? `0${min}` : min.toString();
+    const secStr = sec < 10 ? `0${sec}` : sec.toString();
+    return `${minStr}:${secStr}`;
+  }
+}
+
+function addLyricsDiv() {
+  const lyricsDiv = new Lyrics(LYRICS_FORMAT);
+  lyricsDiv.setStartTime(0);
+  lyricsDiv.setDuration(4);
+  const random = Math.round(Math.random() * 100);
+  lyricsDiv.setContext("Lyrics" + random.toString().padStart(2, "0"));
+
+  if (LyricsArray.getLength() > 0) {
+    const lastSubtitle = LyricsArray.getLyrics(LyricsArray.getLength() - 1);
+    lyricsDiv.setStartTimePx(
+      lastSubtitle.getStartTimePx() + lastSubtitle.getDurationPx(),
+    );
+  }
+
+  LyricsArray.push(lyricsDiv);
+  lyricsContainer.appendChild(lyricsDiv.getDiv());
 }

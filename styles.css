@@ -120,6 +120,15 @@ body {
   display: flex;
   flex-direction: column;
   background-color: var(--timeline-bg-color);
+  position: relative;
+}
+
+#playbar {
+  height: calc(var(--audio-height) + var(--lyrics-height));
+  top: calc(var(--mark-container-height) + var(--mark-time-container-height));
+  border: var(--timeline-border);
+  background-color: var(--color-500);
+  position: absolute;
 }
 
 #mark-time-container {
