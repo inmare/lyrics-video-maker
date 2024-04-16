@@ -32,7 +32,7 @@ document.addEventListener("mousedown", (e) => {
   const isLyricsClicked = e.target.closest(".lyrics") ? true : false;
   HandleMouseEvent.setMousedownState(e, isLyricsClicked);
   if (isLyricsClicked) {
-    // LyricsInfo.displayLyricsInfo(timeEditor, lyricsEditor);
+    LyricsInfo.displayLyricsInfo(timeEditor, lyricsEditor);
   }
 });
 
@@ -49,7 +49,7 @@ document.addEventListener("mouseup", (e) => {
   // 마우스를 떼었을 때 기존에 클래스에 저장한 값 초기화
   const isLyricsDragged = LyricsArray.selected instanceof Lyrics;
   if (isLyricsDragged) {
-    // LyricsInfo.displayLyricsInfo(timeEditor, lyricsEditor);
+    LyricsInfo.displayLyricsInfo(timeEditor, lyricsEditor);
     HandleMouseEvent.initMouseState();
   }
 });
@@ -68,8 +68,8 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 lyricsEditor.addEventListener("focusout", (e) => {
-  if (LyricsInfo.lyricsDiv instanceof Lyrics) {
-    LyricsInfo.lyricsDiv.setContext(e.target.value);
+  if (LyricsInfo.lyrics instanceof Lyrics) {
+    LyricsInfo.lyrics.setContext(e.target.value);
     // const style = new PIXI.TextStyle({
     //   fontFamily: "Arial",
     //   fontSize: 36,
