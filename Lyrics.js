@@ -5,7 +5,6 @@ export default class Lyrics {
   constructor({ startTime, duration, context }) {
     // time, duration : 소수점 세자리까지 표현된 초
     this._startTime = startTime;
-    this._endTime = startTime + duration;
     this._duration = duration;
     this._context = context;
 
@@ -57,6 +56,10 @@ export default class Lyrics {
     return time2px(this._duration);
   }
 
+  getEndTime() {
+    return this._startTime + this._duration;
+  }
+
   getContext() {
     return this._context;
   }
@@ -81,34 +84,34 @@ export default class Lyrics {
     this._div.classList.toggle("lyrics-highlight");
   }
 
-  _formatTime(time, length) {
-    const startTimePx = time;
-    const endTimePx = time + length;
+  // _formatTime(time, length) {
+  //   const startTimePx = time;
+  //   const endTimePx = time + length;
 
-    const startTime = this._px2timeInfo(startTimePx);
-    const endTime = this._px2timeInfo(endTimePx);
+  //   const startTime = this._px2timeInfo(startTimePx);
+  //   const endTime = this._px2timeInfo(endTimePx);
 
-    return {
-      startTime: startTime,
-      endTime: endTime,
-    };
-  }
+  //   return {
+  //     startTime: startTime,
+  //     endTime: endTime,
+  //   };
+  // }
 
-  _px2timeInfo(timePx) {
-    const actualSecond = timePx / SECOND_LEN_PX;
-    const min = Math.floor(actualSecond / 60);
-    const sec = Math.floor(actualSecond) % 60;
-    const msec = Math.round((actualSecond - Math.floor(actualSecond)) * 1000);
+  // _px2timeInfo(timePx) {
+  //   const actualSecond = timePx / SECOND_LEN_PX;
+  //   const min = Math.floor(actualSecond / 60);
+  //   const sec = Math.floor(actualSecond) % 60;
+  //   const msec = Math.round((actualSecond - Math.floor(actualSecond)) * 1000);
 
-    const minStr = min.toString().padStart(2, "0");
-    const secStr = sec.toString().padStart(2, "0");
-    const msecStr = msec.toString().padStart(3, "0");
+  //   const minStr = min.toString().padStart(2, "0");
+  //   const secStr = sec.toString().padStart(2, "0");
+  //   const msecStr = msec.toString().padStart(3, "0");
 
-    return {
-      num: [min, sec, msec],
-      str: [minStr, secStr, msecStr],
-    };
-  }
+  //   return {
+  //     num: [min, sec, msec],
+  //     str: [minStr, secStr, msecStr],
+  //   };
+  // }
 
   _initDiv() {
     const div = document.createElement("div");
