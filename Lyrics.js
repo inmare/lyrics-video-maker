@@ -1,3 +1,4 @@
+import { time2px, px2time } from "./utils";
 import { SECOND_LEN_PX } from "./globals";
 
 export default class Lyrics {
@@ -7,25 +8,32 @@ export default class Lyrics {
     this._endTime = startTime + duration;
     this._duration = duration;
     this._context = context;
-    // 시간을 초 단위로 바꾸기
-    // this._formattedTime = this._formatTime(time);
+
     // div 생성하기
     this._div = this._initDiv();
     this._hightlightDiv = this._initHighlightDiv();
   }
 
-  setTime(startTime) {
+  setStartTime(startTime) {
     this._startTime = startTime;
-    const timePx = this._time2Px(startTime);
+    const timePx = time2px(startTime);
     this._div.style.left = `${timePx}px`;
-    // this._formattedTime = this._formatTime(time, this._length);
   }
 
   setDuration(duration) {
     this._duration = duration;
-    const durationPX = this._duration2Px(duration);
+    const durationPX = time2px(duration);
     this._div.style.width = `${durationPX}px`;
-    // this._formattedTime = this._formatTime(this._time, length);
+  }
+
+  setStartTimePx(startTimePx) {
+    this._startTime = px2time(startTimePx);
+    this._div.style.left = `${startTimePx}px`;
+  }
+
+  setDurationPx(durationPx) {
+    this._duration = px2time(durationPx);
+    this._div.style.width = `${durationPx}px`;
   }
 
   setContext(context) {
@@ -33,20 +41,20 @@ export default class Lyrics {
     this._setDivContext(context);
   }
 
-  _time2Px(time) {
-    return Math.round(time * SECOND_LEN_PX);
+  getStartTime() {
+    return this._startTime;
   }
 
-  _duration2Px(duration) {
-    return Math.round(duration * SECOND_LEN_PX);
+  getStartTimePx() {
+    return time2px(this._startTime);
   }
 
   getDuration() {
     return this._duration;
   }
 
-  getStartTime() {
-    return this._startTime;
+  getDurationPx() {
+    return time2px(this._duration);
   }
 
   getContext() {
@@ -84,14 +92,6 @@ export default class Lyrics {
       startTime: startTime,
       endTime: endTime,
     };
-  }
-
-  getFormattedStartTime() {
-    return this._formattedTime.startTime;
-  }
-
-  getFormattedEndTime() {
-    return this._formattedTime.endTime;
   }
 
   _px2timeInfo(timePx) {
