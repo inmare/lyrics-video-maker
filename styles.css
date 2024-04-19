@@ -127,8 +127,18 @@ body {
   height: calc(var(--audio-height) + var(--lyrics-height));
   top: calc(var(--mark-container-height) + var(--mark-time-container-height));
   border: var(--timeline-border);
-  background-color: var(--color-500);
   position: absolute;
+}
+
+#playbar-arrow {
+  position: relative;
+}
+
+#playbar-arrow > img {
+  position: absolute;
+  width: 40px;
+  top: -24px;
+  left: -20px;
 }
 
 #mark-time-container {
