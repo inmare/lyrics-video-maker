@@ -2,10 +2,12 @@ import Lyrics from "./js/LyricsControl/Lyrics";
 import LyricsArray from "./js/LyricsControl/LyricsArray";
 import LyricsMouseEvent from "./js/LyricsControl/LyricsMouseEvent";
 import LyricsInfo from "./js/LyricsControl/LyricsInfo";
-import VideoProject from "./js/VideoProject/VideoProject";
+import VideoProject from "./js/ProjectControl/VideoProject";
+import VideoCanvas from "./js/CanvasControl/VideoCanvas";
 import { time2px } from "./js/Misc/utils";
 import { LYRICS_FORMAT, SECOND_LEN_PX } from "./js/Misc/globals";
 import * as PIXI from "pixi.js";
+import Playbar from "./js/ProjectControl/Playbar";
 
 // temp global variable
 const tempTimeLineSec = 120;
@@ -15,6 +17,8 @@ VideoProject.length = tempTimeLineSec;
 const addLyricsBtn = document.querySelector("#add-lyrics");
 addLyricsBtn.addEventListener("click", addLyricsDiv);
 
+const playVideoBtn = document.querySelector("#play-video");
+
 const layerWrapper = document.querySelector("#layer-wrapper");
 
 const timelineWrapper = document.querySelector("#timeline-wrapper");
@@ -22,12 +26,12 @@ const timeline = document.querySelector("#timeline");
 const markContainer = document.querySelector("#mark-container");
 const markTimeContainer = document.querySelector("#mark-time-container");
 const lyricsContainer = document.querySelector("#lyrics-container");
+const playbar = document.querySelector("#playbar");
 
 const timeEditor = document.querySelectorAll("#lyrics-info input[type='text']");
 const lyricsEditor = document.querySelector("#lyrics-editor");
 
 const canvasContainer = document.querySelector("#canvas-container");
-const app = new PIXI.Application();
 
 document.addEventListener("mousedown", (e) => {
   // 클릭한 부분이 가사 div인지 확인
@@ -58,32 +62,25 @@ document.addEventListener("mouseup", (e) => {
 
 document.addEventListener("DOMContentLoaded", () => {
   initTimeline();
-  initCanvas();
-  async function initCanvas() {
-    await app.init({
-      background: "#000000",
-      width: 320,
-      height: 180,
-    });
-    canvasContainer.appendChild(app.canvas);
-
-    const text = new PIXI.Text({ text: "Hello, World!", fill: "white" });
-    app.stage.addChild(text);
-  }
+  VideoCanvas.init(canvasContainer);
+  Playbar.init(playbar);
 });
 
 lyricsEditor.addEventListener("focusout", (e) => {
   if (LyricsInfo.lyrics instanceof Lyrics) {
     LyricsInfo.lyrics.setContext(e.target.value);
-    // const style = new PIXI.TextStyle({
-    //   fontFamily: "Arial",
-    //   fontSize: 36,
-    //   fill: "white",
-    // });
-    // const text = new PIXI.Text({ text: e.target.value, style });
-    // text.x = 0;
-    // text.y = 0;
-    // app.stage.addChild(text);
+  }
+});
+
+playVideoBtn.addEventListener("click", (e) => {
+  if (!VideoCanvas.isPlaying) {
+    VideoCanvas.isPlaying = true;
+    VideoCanvas.startUpdate();
+    e.target.innerText = "영상 정지";
+  } else {
+    VideoCanvas.isPlaying = false;
+    VideoCanvas.stopUpdate();
+    e.target.innerText = "영상 재생";
   }
 });
 
