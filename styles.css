@@ -78,6 +78,7 @@ body {
   position: relative;
   width: var(--layer-width);
   background-color: var(--layer-container-color);
+  min-width: 60px;
 }
 
 #layer-lyrics {
