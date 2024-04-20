@@ -6,11 +6,10 @@ import VideoProject from "./js/ProjectControl/VideoProject";
 import VideoCanvas from "./js/CanvasControl/VideoCanvas";
 import { time2px } from "./js/Misc/utils";
 import { LYRICS_FORMAT, SECOND_LEN_PX } from "./js/Misc/globals";
-import * as PIXI from "pixi.js";
 import Playbar from "./js/ProjectControl/Playbar";
 
 // temp global variable
-const tempTimeLineSec = 120;
+const tempTimeLineSec = 5;
 const tempTimelineLength = SECOND_LEN_PX * tempTimeLineSec;
 VideoProject.length = tempTimeLineSec;
 
@@ -82,6 +81,12 @@ playVideoBtn.addEventListener("click", (e) => {
     VideoCanvas.stopUpdate();
     e.target.innerText = "영상 재생";
   }
+});
+
+timelineWrapper.addEventListener("click", (e) => {
+  const scrollAmount = timelineWrapper.scrollLeft;
+  const layerWidth = layerWrapper.getBoundingClientRect().width;
+  Playbar.setPlaybarPos(e, scrollAmount, layerWidth);
 });
 
 function initTimeline() {

@@ -1,4 +1,5 @@
 import Playbar from "../ProjectControl/Playbar";
+import VideoProject from "../ProjectControl/VideoProject";
 import { VIDEO_FRAME, PREVIEW_SIZE } from "../Misc/globals";
 import * as PIXI from "pixi.js";
 
@@ -45,27 +46,32 @@ export default class VideoCanvas {
   }
 
   static startUpdate() {
+    this.isPlaying = true;
     this.startTime = performance.now();
     this.ticker.start();
   }
 
   static stopUpdate() {
     this.ticker.stop();
-    VideoCanvas.isPlaying = false;
-    VideoCanvas.elapsedTime = 0;
-    Playbar.stopPlaybar();
+    this.isPlaying = false;
   }
 
   static updateComponent() {
-    const currentTime = performance.now();
-    const deltaTime = currentTime - this.startTime;
-    const frameTime = 1000 / VIDEO_FRAME;
-    const text = this.app.stage.children[0];
-    if (deltaTime > frameTime) {
-      this.startTime = currentTime;
-      this.elapsedTime += deltaTime;
-      Playbar.movePlaybar();
-      text.text = (this.elapsedTime / 1000).toFixed(1);
+    if (this.elapsedTime <= VideoProject.length * 1000) {
+      const currentTime = performance.now();
+      const deltaTime = currentTime - this.startTime;
+      if (deltaTime + this.elapsedTime > VideoProject.length * 1000) {
+        this.elapsedTime = VideoProject.length * 1000;
+        return;
+      }
+      const frameTime = 1000 / VIDEO_FRAME;
+      const text = this.app.stage.children[0];
+      if (deltaTime > frameTime) {
+        this.startTime = currentTime;
+        this.elapsedTime += deltaTime;
+        Playbar.movePlaybar();
+        text.text = (this.elapsedTime / 1000).toFixed(1);
+      }
     }
   }
 }

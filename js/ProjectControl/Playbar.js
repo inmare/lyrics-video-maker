@@ -1,5 +1,7 @@
 import VideoCanvas from "../CanvasControl/VideoCanvas";
+import VideoProject from "./VideoProject";
 import { SECOND_LEN_PX } from "../Misc/globals";
+import { time2px, px2time } from "../Misc/utils";
 
 export default class Playbar {
   static playbar;
@@ -17,8 +19,13 @@ export default class Playbar {
     this.playbar.style.left = `${currentPx}px`;
   }
 
-  static stopPlaybar() {
-    this.playbar.style.left = "0px";
-    this.currentTime = 0;
+  static setPlaybarPos(e, scrollAmount, layerWidth) {
+    const mouseX = e.clientX;
+    const clickedPos = mouseX + scrollAmount - layerWidth;
+    const clickedTime = px2time(clickedPos);
+    this.playbar.style.left = `${clickedPos}px`;
+    this.playbar.currentTime = clickedTime;
+    VideoCanvas.elapsedTime = clickedTime * 1000;
+    VideoCanvas.ticker.update();
   }
 }
