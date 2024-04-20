@@ -1,5 +1,7 @@
 import Lyrics from "./Lyrics";
 import LyricsArray from "./LyricsArray";
+import VideoProject from "../ProjectControl/VideoProject";
+import { time2px } from "../Misc/utils";
 
 export default class LyricsMouseEvent {
   // 마우스 이벤트 관련 static 변수
@@ -112,7 +114,7 @@ export default class LyricsMouseEvent {
     if (nextLyrics) {
       divEndLimit = nextLyrics.getStartTimePx();
     } else if (!nextLyrics && lyricsIdx === LyricsArray.getLength() - 1) {
-      divEndLimit = LyricsArray.timelineLength - 1;
+      divEndLimit = time2px(VideoProject.length);
     }
 
     if (prevLyrics) {
@@ -196,10 +198,10 @@ export default class LyricsMouseEvent {
           if (nextLyrics) {
             // div의 크기제한 = 다음 가사의 시작점
             // + 1을 해야지 다음 가사의 사이에 틈이 생기지 않음
-            divEndLimit = nextLyrics.getStartTimePx() + 1;
+            divEndLimit = nextLyrics.getStartTimePx();
           } else if (!nextLyrics && lyricsIdx === LyricsArray.getLength() - 1) {
             // 다음 가사가 없을 때 div의 크기제한 = 타임라인의 끝
-            divEndLimit = LyricsArray.timelineLength + 1;
+            divEndLimit = time2px(VideoProject.length);
           }
 
           if (currentDivEnd > divEndLimit) {
