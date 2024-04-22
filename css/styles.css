@@ -1,18 +1,5 @@
-@font-face {
-  font-family: "D2Coding";
-  src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_three@1.0/D2Coding.woff")
-    format("woff");
-  font-weight: normal;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: "NanumSquareRound";
-  src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_two@1.0/NanumSquareRound.woff")
-    format("woff");
-  font-weight: normal;
-  font-style: normal;
-}
+@charset "UTF-8";
+@import "./fonts.css";
 
 :root {
   /* colors */
@@ -31,7 +18,7 @@
   /* layer */
   --lyrics-height: 60px;
   --audio-height: calc(var(--lyrics-height) * 0.6);
-  --layer-width: 400px;
+  --layer-width: 100px;
   --layer-container-color: var(--color-100);
   --layer-bg-color: var(--color-700);
   --layer-font-color: var(--color-50);
