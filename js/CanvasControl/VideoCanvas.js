@@ -5,73 +5,79 @@ import * as PIXI from "pixi.js";
 
 export default class VideoCanvas {
   static app;
-  static ticker;
-  static startTime;
   static isPlaying = false;
-  static elapsedTime = 0;
-  static lyricsFont;
+  static currentTime = 0;
+  static lastUpdatedTime = null;
 
   constructor() {}
 
   static async init(canvasContainer) {
     this.app = new PIXI.Application();
+
     await this.app.init({
       background: "#000000",
       width: PREVIEW_SIZE[0],
       height: PREVIEW_SIZE[1],
     });
 
-    this.lyricsFont = await PIXI.Assets.load(
-      "../../assets/PretendardJP-SemiBold.woff2",
-    );
+    this.app.ticker.stop();
+    this.app.ticker.autoStart = false;
+    this.app.ticker.add(() => {
+      this.updateComponent();
+    });
+
     canvasContainer.appendChild(this.app.canvas);
 
     const text = new PIXI.Text({
-      text: "Hello, World!",
+      text: "",
       style: {
-        fontFamily: "PretendardJP-SemiBold",
-        fontSize: 24,
+        fontFamily: "Pretendard JP Variable",
+        fontSize: 25,
         fill: 0xffffff,
+        align: "center",
       },
     });
     text.x = 0;
     text.y = 0;
     this.app.stage.addChild(text);
-
-    this.ticker = new PIXI.Ticker();
-    this.ticker.autostart = false;
-    this.ticker.add(() => {
-      this.updateComponent();
-    });
+    this.app.ticker.update();
   }
 
   static startUpdate() {
     this.isPlaying = true;
-    this.startTime = performance.now();
-    this.ticker.start();
+    this.app.ticker.start();
   }
 
   static stopUpdate() {
-    this.ticker.stop();
+    this.app.ticker.stop();
     this.isPlaying = false;
+    this.lastUpdatedTime = null;
   }
 
   static updateComponent() {
-    if (this.elapsedTime <= VideoProject.length * 1000) {
+    if (this.isPlaying) {
+      if (this.lastUpdatedTime === null) {
+        this.lastUpdatedTime = performance.now();
+      }
       const currentTime = performance.now();
-      const deltaTime = currentTime - this.startTime;
-      if (deltaTime + this.elapsedTime > VideoProject.length * 1000) {
-        this.elapsedTime = VideoProject.length * 1000;
-        return;
-      }
-      const frameTime = 1000 / VIDEO_FRAME;
-      const text = this.app.stage.children[0];
-      if (deltaTime > frameTime) {
-        this.startTime = currentTime;
-        this.elapsedTime += deltaTime;
+      const elapsedTime = currentTime - this.lastUpdatedTime;
+      // console.log(this.currentTime);
+
+      if (elapsedTime >= 1000 / VIDEO_FRAME) {
+        if (
+          this.currentTime + 1000 / VIDEO_FRAME >=
+          VideoProject.length * 1000
+        ) {
+          this.currentTime = VideoProject.length * 1000;
+        } else {
+          this.currentTime += 1000 / VIDEO_FRAME;
+          this.lastUpdatedTime = currentTime;
+        }
         Playbar.movePlaybar();
-        text.text = (this.elapsedTime / 1000).toFixed(1);
+        this.app.stage.children[0].text = `${Math.floor(this.currentTime)}`;
       }
+    } else {
+      this.app.stage.children[0].text = `${Math.floor(this.currentTime)}`;
     }
   }
 }
