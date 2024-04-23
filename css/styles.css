@@ -116,6 +116,7 @@ body {
   top: calc(var(--mark-container-height) + var(--mark-time-container-height));
   border: var(--timeline-border);
   position: absolute;
+  z-index: 1;
 }
 
 #playbar-arrow {
