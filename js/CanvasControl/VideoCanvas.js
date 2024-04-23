@@ -12,12 +12,18 @@ export default class VideoCanvas {
   constructor() {}
 
   static async init(canvasContainer) {
+    const canvasScale = window.devicePixelRatio || 1;
+    PIXI.AbstractRenderer.defaultOptions.resolution = canvasScale;
+    PIXI.AbstractRenderer.defaultOptions.antialias = true;
+    PIXI.AbstractRenderer.defaultOptions.autoDensity = true;
+    PIXI.AbstractRenderer.defaultOptions.roundPixels = true;
+
     this.app = new PIXI.Application();
 
     await this.app.init({
       background: "#000000",
-      width: PREVIEW_SIZE[0],
-      height: PREVIEW_SIZE[1],
+      width: PREVIEW_SIZE[0] * canvasScale,
+      height: PREVIEW_SIZE[1] * canvasScale,
     });
 
     this.app.ticker.stop();
@@ -27,18 +33,23 @@ export default class VideoCanvas {
     });
 
     canvasContainer.appendChild(this.app.canvas);
+    this.app.canvas.style.width = `${PREVIEW_SIZE[0]}px`;
+    this.app.canvas.style.height = `${PREVIEW_SIZE[1]}px`;
 
     const text = new PIXI.Text({
       text: "",
       style: {
         fontFamily: "Pretendard JP Variable",
-        fontSize: 25,
+        fontSize: 50,
+        fontWeight: 700,
         fill: 0xffffff,
         align: "center",
       },
     });
     text.x = 0;
     text.y = 0;
+    // this.app.stage.scale.set(0.5, 0.5);
+    // console.log(this.app.stage.scale.x);
     this.app.stage.addChild(text);
     this.app.ticker.update();
   }
