@@ -1,6 +1,10 @@
 {
-  "extends": ["import", "prettier"],
-  "plugins": ["prettier"],
+  "extends": ["import", "prettier", "typescript"],
+  "plugins": ["@typescript-eslint", "import", "prettier"],
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "project": "./tsconfig.json"
+  },
   "rules": {
     "prettier/prettier": "error"
   },
