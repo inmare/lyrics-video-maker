@@ -1,8 +1,12 @@
 import { time2px, px2time } from "../Misc/utils";
 
 export default class Lyrics {
-  constructor({ startTime, duration, context }) {
-    // time, duration : 소수점 세자리까지 표현된 초
+  /**
+   * @param {object} startTime 가사의 시작시간 .sec = 시작 초 .frame = 시작 프레임
+   * @param {object} duration 가사의 지속시간 .sec = 지속 초 .frame = 지속 프레임
+   * @param {string} context 가사의 내용
+   */
+  constructor(startTime, duration, context) {
     this._startTime = startTime;
     this._duration = duration;
     this._context = context;
